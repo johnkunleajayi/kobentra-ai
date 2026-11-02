@@ -1,0 +1,22 @@
+# Architecture and authorization boundary
+
+## Target topology
+Kobentra React client → secure multi-tenant FastAPI backend → one centrally managed Salesforce org, through authorized adapters. Users have Kobentra identities and do not need Salesforce accounts. Salesforce is not assumed to provide tenant separation for Kobentra customers.
+
+Phase 1 ships no real authentication or workspace CRUD endpoints. The sole protected stub fails closed; caller-supplied user/organization headers cannot establish identity. No demo token is accepted by the API. Future identity verification must construct a trusted Principal from a verified session, then validate current membership on every operation. Owner/admin write and member read semantics are the foundation policy; future permissions need explicit endpoints and tests.
+
+## Data model
+Users and organizations are linked by memberships with constrained roles. Organization-scoped tables are business_profiles, market_preferences, opportunities, match_explanations, introduction_requests and business_events. Every scoped row has an indexed organization_id. Scoped list/get functions authorize membership first and constrain the organization in SQL. A foreign record identifier in an authorized organization returns 404. Composite foreign keys prevent explanations and introduction requests from referencing another organization's opportunity. SQLite engine foreign keys are explicitly enabled.
+
+Users/organizations/memberships are security infrastructure and have no public listing endpoints. Do not expose unrestricted ORM sessions or unscoped repositories to routes. New read and write handlers must use authorized scope; no real writes are exposed yet. PostgreSQL RLS would be defense in depth after approved provisioning, not a substitute for application authorization. SQLite tests do not prove PostgreSQL isolation.
+
+## Discovery and consent roadmap
+No real cross-tenant discovery exists. A future opt-in directory must publish a minimal safe projection after explicit organization permission. Private profiles remain scoped. Future shared introductions require a separately authorized recipient projection, immutable sender/recipient principals, explicit acceptance by both parties, withdrawal/expiry, audit history and an atomic server-side contact-release gate. Phase 1 intentionally permits only requested/withdrawn schema states and has no contacts or release endpoint; it cannot claim that full consent workflow is implemented.
+
+## Integration contracts
+IntegrationScope is a proposed Kobentra-owned authorized boundary. It is not sufficient to trust a browser organization ID. Future implementations must recheck membership, map local organizations to provider records, constrain every query/write, reject conflicting tenant provenance, redact logs and use idempotency. OAuth tokens and Salesforce credentials belong in server-side secret storage only.
+
+EventDiscoveryAdapter is an internal interface, not an assertion about EventSpark APIs. EventSpark remains planned and disconnected pending sandbox availability, licensing, actual capabilities and organizer clarification. The design reference site is not implementation proof. Do not infer package object names, API endpoints or sharing behavior.
+
+## Configuration and observability
+Strict environment values reject unknown settings and remote DB URLs. CORS is an explicit allowlist, not an authorization mechanism. Health is a liveness/configuration summary and says database not_connected because API startup performs no DB connection. Errors expose an allowlisted code and generated request ID; rejected input is not echoed. Unexpected failures log only request ID. Start uvicorn with --no-access-log to avoid URL/query logging. Future auth needs CSRF/session protections, rate limiting, email verification, password handling/provider validation, revocation and a security review before release.

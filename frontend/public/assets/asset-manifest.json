@@ -1,0 +1,164 @@
+[
+  {
+    "filename": "home/home-hero-business-connections.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "filename": "home/home-african-entrepreneur.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "filename": "home/home-business-partnerships.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1671,
+      941
+    ]
+  },
+  {
+    "filename": "home/home-event-discovery.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "filename": "home/home-business-growth.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "filename": "home/home-business-opportunity-notifications.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1671,
+      941
+    ]
+  },
+  {
+    "filename": "how-it-works/how-it-works-01-signup.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1671,
+      941
+    ]
+  },
+  {
+    "filename": "how-it-works/how-it-works-02-business-profile.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "filename": "how-it-works/how-it-works-03-discover-matches.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "filename": "how-it-works/how-it-works-04-request-introduction.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "filename": "how-it-works/how-it-works-05-manage-opportunities.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1671,
+      941
+    ]
+  },
+  {
+    "filename": "businesses/for-businesses-discover-partners.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1671,
+      941
+    ]
+  },
+  {
+    "filename": "businesses/for-businesses-growth-opportunities.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1671,
+      941
+    ]
+  },
+  {
+    "filename": "organizers/for-event-organizers-event-management.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1670,
+      941
+    ]
+  },
+  {
+    "filename": "organizers/for-event-organizers-attendee-engagement.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1670,
+      941
+    ]
+  },
+  {
+    "filename": "platform/platform-connected-business-ecosystem.png",
+    "mode": "RGB",
+    "alpha": false,
+    "size": [
+      1670,
+      941
+    ]
+  },
+  {
+    "filename": "brand/kobentra-logo-light.png",
+    "mode": "RGBA",
+    "alpha": true,
+    "size": [
+      2172,
+      724
+    ]
+  },
+  {
+    "filename": "brand/kobentra-logo-dark.png",
+    "mode": "RGBA",
+    "alpha": true,
+    "size": [
+      2172,
+      724
+    ]
+  }
+]

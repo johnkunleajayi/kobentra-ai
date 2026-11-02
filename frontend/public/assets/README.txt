@@ -1,0 +1,1 @@
+Kobentra AI approved assets. Image 05 excluded: approval not established. Logo transparency must be verified and cleaned if necessary; do not assume a checkerboard or black preview means alpha. Image-based UI is illustrative only, not functional.
