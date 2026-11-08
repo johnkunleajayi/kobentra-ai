@@ -1,7 +1,13 @@
 import { Cta } from "./components/Primitives";
+import { AuthContext } from "./features/auth/AuthContext";
+import {
+  getCurrentUser,
+  signOut,
+  type AuthenticatedUser,
+} from "./features/auth/session";
 import { Home, How, Audience, Platform } from "./features/public/Pages";
 import { useEffect, useState } from "react";
-import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
+import { Link, NavLink, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { ArrowUpRight, Sun, Moon, Menu, X } from "lucide-react";
 import { Auth } from "./features/auth/Auth";
 import { Workspace } from "./features/demo/Workspace";
@@ -17,6 +23,37 @@ function Layout() {
     () => localStorage.getItem("kobentra-theme") === "dark",
   );
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    getCurrentUser()
+      .then((result) => {
+        if (active) setUser(result);
+      })
+      .catch(() => {
+        if (active) setAuthError("Session check unavailable.");
+      })
+      .finally(() => {
+        if (active) setAuthLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function logout() {
+    try {
+      await signOut();
+      setUser(null);
+      window.location.assign("/signin");
+    } catch {
+      setAuthError("Sign-out failed. Please try again.");
+    }
+  }
   const { pathname } = useLocation();
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
@@ -27,7 +64,7 @@ function Layout() {
     document.title = `Kobentra — ${pathname === "/" ? "Connections that move business forward" : pathname.split("/").filter(Boolean).join(" / ")}`;
   }, [pathname]);
   return (
-    <>
+    <AuthContext.Provider value={Boolean(user)}>
       <a className="skip" href="#main">
         Skip to content
       </a>
@@ -56,13 +93,26 @@ function Layout() {
           >
             {dark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <Link className="signin" to="/signin">
-            Sign in
-          </Link>
-          <Link className="button small desktop-cta" to="/signup">
-            Get started
-            <ArrowUpRight size={16} />
-          </Link>
+          {user ? (
+            <>
+              <Link className="signin" to="/account">
+                My account
+              </Link>
+              <button className="signin" type="button" onClick={logout}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link className="signin" to="/signin">
+              Sign in
+            </Link>
+          )}
+          {!user && (
+            <Link className="button small desktop-cta" to="/signup">
+              Get started
+              <ArrowUpRight size={16} />
+            </Link>
+          )}
           <button
             className="icon-button menu"
             aria-label={open ? "Close navigation" : "Open navigation"}
@@ -81,7 +131,49 @@ function Layout() {
           <Route path="/organizers" element={<Audience organizer />} />
           <Route path="/platform" element={<Platform />} />
           <Route path="/signin" element={<Auth />} />
-          <Route path="/signup" element={<Auth signup />} />
+          <Route
+            path="/account"
+            element={
+              authLoading ? (
+                <section className="section" aria-live="polite">
+                  Checking your session...
+                </section>
+              ) : authError ? (
+                <section className="section" role="alert">
+                  <h1>Session unavailable</h1>
+                  <p>{authError}</p>
+                  <button className="button" onClick={() => window.location.reload()}>
+                    Retry
+                  </button>
+                </section>
+              ) : user ? (
+                <section className="section">
+                  <span className="eyebrow">YOUR KOBENTRA ACCOUNT</span>
+                  <h1>Welcome to Kobentra.</h1>
+                  <p>You are securely signed in as <strong>{user.email}</strong>.</p>
+                  <p>
+                    Your account is active. Business onboarding and the live
+                    workspace are the next implementation milestones.
+                  </p>
+                  <div>
+                    <Link className="button" to="/onboarding">
+                      Explore the local demo
+                    </Link>
+                  </div>
+                  <p className="small-copy">
+                    Demo information is fictional and is not saved to your
+                    authenticated business account.
+                  </p>
+                  <button className="secondary" type="button" onClick={logout}>
+                    Sign out
+                  </button>
+                </section>
+              ) : (
+                <Navigate to="/signin" replace />
+              )
+            }
+          />
+          <Route path="/signup" element={user ? <Navigate to="/account" replace /> : <Auth signup />} />
           <Route path="/onboarding" element={<Auth onboarding />} />
           <Route path="/demo/*" element={<Workspace />} />
           <Route
@@ -125,7 +217,7 @@ function Layout() {
           <span>Made for West Africa. Open to possibility.</span>
         </div>
       </footer>
-    </>
+    </AuthContext.Provider>
   );
 }
 export default function App() {

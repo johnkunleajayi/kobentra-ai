@@ -7,8 +7,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.sessions import SessionMiddleware
 
+from .auth_routes import router as auth_router
 from .config import Settings
+from .database import database_engine
 from .security import Principal, require_principal
 
 logger = logging.getLogger("kobentra")
@@ -17,11 +20,24 @@ logger = logging.getLogger("kobentra")
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
     api = FastAPI(title="Kobentra API", version="0.1.0")
+    api.state.settings = settings
+    api.state.database_engine = database_engine(settings)
+    # Temporary signed OAuth state storage.
+    # Production must use HTTPS and secure cookies.
+    if settings.oauth_session_secret:
+        api.add_middleware(
+            SessionMiddleware,
+            secret_key=settings.oauth_session_secret.get_secret_value(),
+            session_cookie="kobentra_oauth",
+            max_age=600,
+            same_site="lax",
+            https_only=settings.google_redirect_uri.startswith("https://"),
+        )
     api.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
-        allow_credentials=False,
-        allow_methods=["GET"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
         allow_headers=["Content-Type"],
     )
 
@@ -79,6 +95,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @api.get("/api/workspace")
     def workspace(principal: Annotated[Principal, Depends(require_principal)]):
         raise HTTPException(503, detail="Workspace API is not implemented")
+
+    if (
+        settings.google_client_id
+        and settings.google_client_secret
+        and settings.oauth_session_secret
+    ):
+        api.include_router(auth_router)
 
     return api
 

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useAuthenticated } from "../features/auth/AuthContext";
 import { ArrowUpRight } from "lucide-react";
 const A = "/assets/";
 export function Picture({
@@ -37,9 +38,20 @@ export function Cta({
   to?: string;
   children?: React.ReactNode;
 }) {
+  const authenticated = useAuthenticated();
+  const registrationAction = to === "/signup";
+
+  const destination =
+    authenticated && registrationAction ? "/account" : to;
+
+  const label =
+    authenticated && registrationAction
+      ? "Go to my account"
+      : children;
+
   return (
-    <Link className="button" to={to}>
-      {children}
+    <Link className="button" to={destination}>
+      {label}
       <ArrowUpRight size={18} />
     </Link>
   );

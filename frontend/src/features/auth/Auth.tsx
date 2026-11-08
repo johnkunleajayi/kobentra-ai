@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowUpRight, LockKeyhole } from "lucide-react";
 import { emailProvider } from "../contracts";
+import { getCurrentUser, startGoogleLogin } from "./session";
 export function Auth({
   signup = false,
   onboarding = false,
@@ -12,6 +13,23 @@ export function Auth({
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (onboarding) return;
+    let active = true;
+
+    getCurrentUser()
+      .then((user) => {
+        if (active && user) navigate("/account", { replace: true });
+      })
+      .catch(() => {
+        // Login remains available if session restoration fails.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [navigate, onboarding]);
   return (
     <section className="auth section">
       <div className="auth-aside">
@@ -51,20 +69,17 @@ export function Auth({
         <p>
           {onboarding
             ? "Use fictional details only. This profile lives in your browser session."
-            : "Email and Google authentication are planned. Forms validate locally; no real account or login session is created."}
+            : "Sign in securely with Google. Email and password authentication are not available yet."}
         </p>
         {!onboarding && (
           <>
             <button
               className="provider-button"
-              onClick={() =>
-                setMessage(
-                  "Google sign-in is not configured. No authentication was started.",
-                )
-              }
+              type="button"
+              onClick={startGoogleLogin}
             >
               <span aria-hidden="true">G</span> Continue with Google{" "}
-              <span className="badge">Not configured</span>
+              <span className="badge">Secure sign-in</span>
             </button>
             <div className="divider">or explore the email form</div>
           </>

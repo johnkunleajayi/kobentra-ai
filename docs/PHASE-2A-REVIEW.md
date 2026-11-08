@@ -1,0 +1,11 @@
+# Phase 2A — PostgreSQL preparation (6 November 2026)
+
+Implemented secure PostgreSQL configuration using existing psycopg 3, while retaining the SQLite default and compatibility alias `local_engine`. `database_engine` is lazy, hides parameters, disables SQL echo and registers the foreign-key PRAGMA only on SQLite. Database URLs are SecretStr values; backend/.env is anchored to the backend folder, environment values take precedence, and settings/error representations redact secrets.
+
+PostgreSQL accepts postgresql:// and postgresql+psycopg://, normalizing to psycopg 3. Verified TLS and channel binding are required, defaulted when omitted. Unsupported drivers, incomplete credentials, weakening/duplicate options and unexpected query overrides are rejected. The example contains placeholders only. No real .env was created or modified.
+
+Reviewed initial revision 1f3070c2a69e: its types, constraints, composite tenant foreign keys, indexes and dependency order need no PostgreSQL changes. Alembic environment now renders batch operations only for SQLite, passes a SQLAlchemy URL without config interpolation and disposes online engines. Both full upgrade and downgrade SQL generate offline for PostgreSQL and SQLite. Existing business models, authorization rules and revision file are unchanged.
+
+Verification: 48 pytest tests pass (17 new database-focused cases plus 31 existing tests), Ruff lint/format checks pass, git diff --check passes. SQLite upgrade/drift/downgrade/re-upgrade occurs only in disposable files beneath D:/kobentra-ai/work/pytest-phase2a. PostgreSQL engine tests mock psycopg.connect to fail on any connection attempt; offline migration tests also prohibit DBAPI connections. The sandboxed full run stalled at TestClient; an authorized elevated local-only rerun completed with 48 passed in 3.11 seconds. One existing Starlette TestClient/httpx deprecation warning remains.
+
+No Neon DNS/connection, live PostgreSQL test, remote migration, authentication/Salesforce implementation, commit, push or deployment was performed. PostgreSQL compatibility is verified by configuration/driver tests and offline migration SQL, not live database execution. Stop here pending a separately authorized connection/migration task.

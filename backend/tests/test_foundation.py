@@ -193,7 +193,7 @@ def test_cors_allowlist():
         "https://example.invalid",
     ],
 )
-def test_remote_database_configuration_rejected(url):
+def test_incomplete_or_unsupported_database_configuration_rejected(url):
     with pytest.raises(ValidationError):
         Settings(database_url=url)
 

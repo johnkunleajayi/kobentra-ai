@@ -23,16 +23,22 @@ Health: http://127.0.0.1:8000/api/health. Backend startup does not connect to a 
 
 No `.env` is needed for the safe defaults. Optional examples exist in each app folder. Do not put secrets in `VITE_*` variables. Keep servers bound to loopback.
 
-## Local database only
+## Database configuration — Phase 2A
 
-Schema design is PostgreSQL compatible; Phase 1 configuration deliberately rejects non-SQLite database URLs. PostgreSQL DDL was compiled without connecting. No PostgreSQL/Neon runtime, RLS, concurrency or migration behavior has been verified.
+SQLite remains the default. Settings load `DATABASE_URL` from `backend/.env` regardless of the process working directory; environment variables override that file. No credentials are required for local development. Copy `backend/.env.example` only when no `.env` already exists, and keep it ignored by Git.
+
+PostgreSQL URLs using `postgresql://` or `postgresql+psycopg://` use the existing psycopg 3 dependency. The former is normalized to the latter. URL-encode special characters in usernames/passwords. PostgreSQL requires a host, database, username and password. TLS defaults to `sslmode=verify-full&channel_binding=require`; weaker or ambiguous options are rejected. Allowed query options are sslmode, channel_binding, sslrootcert and connect_timeout; service/host overrides and unknown options are rejected. A trusted root certificate file can be provided with sslrootcert if required by the approved environment; do not weaken TLS to address trust failures.
+
+Settings redact the database URL in representations and JSON, and validation messages hide rejected input. Engines disable SQL echo and hide bound parameters. Never print `.env`, a revealed secret URL, raw validation `.errors()` input, DBAPI connection arguments or connection exception payloads. Engine construction is lazy and does not establish a connection; SQLite PRAGMA hooks are registered only for SQLite engines. The API health route remains independent of database availability and does not connect during startup.
+
+**Neon is prepared for configuration only. No Neon connection or remote migration is authorized or performed.** All PostgreSQL tests use placeholder URLs, mocked connections or offline SQL generation. No live PostgreSQL/Neon runtime, RLS, concurrency or migration behavior has been verified.
 
 ```powershell
 Set-Location D:\kobentra-ai\backend
 .\.venv\Scripts\python.exe -m alembic upgrade head
 .\.venv\Scripts\python.exe -m alembic check
 ```
-These commands use local `kobentra-local.db`. The initial local migration was already applied during verification. Tests exercise upgrade/downgrade/re-upgrade on a disposable temporary SQLite file, with foreign keys enabled. Do not set up or connect a remote database without new approval.
+Run these commands only while DATABASE_URL selects local SQLite. Alembic online commands connect to the configured database, so do not run them with a Neon URL until separately approved. With the default configuration they use local `kobentra-local.db`. The initial local migration was already applied during verification. Tests exercise upgrade/downgrade/re-upgrade on a disposable temporary SQLite file, with foreign keys enabled. Do not set up or connect a remote database without new approval.
 
 ## Verification
 
@@ -62,7 +68,7 @@ Read `docs/PHASE-1-REVIEW.md` for evidence and limitations. Browser JSON and rev
 - `frontend/src/features/demo/`: fictional data and interactive local workspace.
 - `frontend/src/features/contracts.ts`: typed frontend/provider contracts.
 - `backend/app/`: configuration, models, authorization helpers, schemas, errors and disconnected integration contracts.
-- `backend/migrations/`: initial schema migration and local-only environment.
+- `backend/migrations/`: initial schema migration and dialect-aware environment.
 - `backend/tests/`: authorization, schema, configuration and migration tests.
 
 ## Demo retention and boundaries
@@ -71,4 +77,4 @@ All sample businesses and the sample event are fictional. Profile details persis
 
 Email signup, Google OAuth, real profiles/discovery, AI matching, notifications, two-party introduction acceptance, private contact release, cross-tenant publication and durable pipelines are unimplemented. Salesforce and EventSpark are disconnected; adapter methods explicitly raise rather than fake success. No credentials or OAuth tokens exist in this project.
 
-No Git repository was present and none was initialized. No commit, push, deployment, Salesforce connection, EventSpark installation, OAuth configuration or remote database operation occurred.
+No commit, push, deployment, Salesforce connection, EventSpark installation, OAuth configuration or remote database operation was performed during Phase 2A.

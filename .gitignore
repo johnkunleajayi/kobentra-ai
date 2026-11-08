@@ -10,3 +10,18 @@ __pycache__/
 work/
 frontend/test-results/
 frontend/playwright-report/
+
+# Local development backups
+*.bak
+*.bak.*
+*.pre-*.bak
+.auth-backup-*/
+.cta-backup-*/
+
+# TypeScript generated build information
+*.tsbuildinfo
+
+# Local environment secrets
+.env
+.env.*
+!.env.example

@@ -1,20 +1,28 @@
 from alembic import context
-from app.database import local_engine
-from app.models import Base
+from sqlalchemy.engine import make_url
+
 from app.config import Settings
+from app.database import database_engine
+from app.models import Base
 
 settings = Settings()
-url = settings.database_url
+# Never put the credential-bearing URL into Alembic's interpolated config/logs.
+url = make_url(settings.database_url.get_secret_value())
+batch = url.get_backend_name() == "sqlite"
 if context.is_offline_mode():
     context.configure(
-        url=url, target_metadata=Base.metadata, literal_binds=True, render_as_batch=True
+        url=url, target_metadata=Base.metadata, literal_binds=True, render_as_batch=batch
     )
     with context.begin_transaction():
         context.run_migrations()
 else:
-    with local_engine(settings).connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=Base.metadata, render_as_batch=True
-        )
-        with context.begin_transaction():
-            context.run_migrations()
+    engine = database_engine(settings)
+    try:
+        with engine.connect() as connection:
+            context.configure(
+                connection=connection, target_metadata=Base.metadata, render_as_batch=batch
+            )
+            with context.begin_transaction():
+                context.run_migrations()
+    finally:
+        engine.dispose()
