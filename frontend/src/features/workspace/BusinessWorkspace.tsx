@@ -17,6 +17,7 @@ import { businessPath } from "./api";
 import { useResource } from "./useResource";
 import { ResourceState } from "./ResourceState";
 import { BusinessSwitcher } from "./BusinessSwitcher";
+import { DiscoveryPage } from "../discovery/DiscoveryPage";
 
 export function BusinessWorkspace() {
   const { businessId = "" } = useParams();
@@ -64,8 +65,12 @@ function WorkspaceContent({ businessId }: { businessId: string }) {
           <NavLink to={`/workspace/${businessId}/opportunities`}>
             Opportunities
           </NavLink>
-          <span>Matches · Upcoming</span>
-          <NavLink to={`/workspace/${businessId}/assessments`}>Assessments</NavLink>
+          <NavLink to={`/workspace/${businessId}/discover`}>
+            Partner discovery
+          </NavLink>
+          <NavLink to={`/workspace/${businessId}/assessments`}>
+            Assessments
+          </NavLink>
           <span>Introductions · Upcoming</span>
         </nav>
         <Link to="/workspace">All workspaces</Link>
@@ -109,8 +114,8 @@ function WorkspaceContent({ businessId }: { businessId: string }) {
                   </Link>
                 </div>
                 <p>
-                  Partner matching and introductions are upcoming. No
-                  connections are sent from this workspace.
+                  Explore provisional partner discovery. Introductions are
+                  upcoming. No connections are sent from this workspace.
                 </p>
               </>
             }
@@ -119,7 +124,18 @@ function WorkspaceContent({ businessId }: { businessId: string }) {
             path="profile"
             element={<BusinessSummary business={active} />}
           />
-          <Route path="assessments" element={<AssessmentsPage businessId={businessId} writable={writable} />} />
+          <Route
+            path="discover"
+            element={
+              <DiscoveryPage businessId={businessId} country={active.country} />
+            }
+          />
+          <Route
+            path="assessments"
+            element={
+              <AssessmentsPage businessId={businessId} writable={writable} />
+            }
+          />
           <Route
             path="preferences"
             element={
