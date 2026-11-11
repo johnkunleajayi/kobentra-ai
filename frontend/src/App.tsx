@@ -1,4 +1,9 @@
 import { Cta } from "./components/Primitives";
+import { AuthenticatedPage } from "./features/auth/AuthenticatedPage";
+import { BusinessAccount } from "./features/business/BusinessAccount";
+import { BusinessOnboarding } from "./features/business/BusinessOnboarding";
+import { BusinessSelection } from "./features/workspace/BusinessSelection";
+import { BusinessWorkspace } from "./features/workspace/BusinessWorkspace";
 import { AuthContext } from "./features/auth/AuthContext";
 import {
   getCurrentUser,
@@ -131,6 +136,13 @@ function Layout() {
           <Route path="/organizers" element={<Audience organizer />} />
           <Route path="/platform" element={<Platform />} />
           <Route path="/signin" element={<Auth />} />
+          <Route path="/workspace" element={<AuthenticatedPage loading={authLoading} error={authError} signedIn={Boolean(user)}><BusinessSelection /></AuthenticatedPage>} />
+          <Route path="/workspace/:businessId/*" element={<AuthenticatedPage loading={authLoading} error={authError} signedIn={Boolean(user)}><BusinessWorkspace /></AuthenticatedPage>} />
+          <Route path="/business/onboarding" element={
+            <AuthenticatedPage loading={authLoading} error={authError} signedIn={Boolean(user)}>
+              <BusinessOnboarding />
+            </AuthenticatedPage>
+          } />
           <Route
             path="/account"
             element={
@@ -147,27 +159,7 @@ function Layout() {
                   </button>
                 </section>
               ) : user ? (
-                <section className="section">
-                  <span className="eyebrow">YOUR KOBENTRA ACCOUNT</span>
-                  <h1>Welcome to Kobentra.</h1>
-                  <p>You are securely signed in as <strong>{user.email}</strong>.</p>
-                  <p>
-                    Your account is active. Business onboarding and the live
-                    workspace are the next implementation milestones.
-                  </p>
-                  <div>
-                    <Link className="button" to="/onboarding">
-                      Explore the local demo
-                    </Link>
-                  </div>
-                  <p className="small-copy">
-                    Demo information is fictional and is not saved to your
-                    authenticated business account.
-                  </p>
-                  <button className="secondary" type="button" onClick={logout}>
-                    Sign out
-                  </button>
-                </section>
+                <BusinessAccount email={user.email} logout={logout} />
               ) : (
                 <Navigate to="/signin" replace />
               )

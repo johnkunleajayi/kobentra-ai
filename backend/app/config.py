@@ -1,10 +1,12 @@
-﻿from pathlib import Path
+from pathlib import Path
 from typing import Literal
 
 from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ArgumentError
+
+from .assessments.constants import PUBLIC_URL
 
 
 class Settings(BaseSettings):
@@ -29,6 +31,28 @@ class Settings(BaseSettings):
     session_cookie_name: str = "kobentra_session"
     session_lifetime_hours: int = 24
     frontend_url: str = "http://127.0.0.1:5173"
+    surveyvista_launch_url: str | None = PUBLIC_URL
+
+    @field_validator("surveyvista_launch_url")
+    @classmethod
+    def survey_launch_url(cls, value: str | None) -> str | None:
+        from urllib.parse import parse_qs, urlparse
+
+        if not value:
+            return None
+        url = urlparse(value)
+        query = parse_qs(url.query, keep_blank_values=True)
+        if (
+            url.scheme != "https"
+            or url.hostname != "orgfarm-7cee962a58-dev-ed.develop.my.site.com"
+            or url.netloc != url.hostname
+            or url.path != "/kobentraassess/s/survey-response"
+            or url.fragment
+            or set(query) != {"recordId", "logicalId"}
+            or any(len(v) != 1 or not v[0] or len(v[0]) > 100 for v in query.values())
+        ):
+            raise ValueError("Invalid SurveyVista public launch URL")
+        return value
 
     @field_validator("database_url")
     @classmethod
@@ -79,5 +103,3 @@ class Settings(BaseSettings):
                 "CORS requires explicit HTTP origins without paths, wildcards or credentials"
             )
         return values
-
-

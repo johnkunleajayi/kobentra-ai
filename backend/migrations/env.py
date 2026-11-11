@@ -1,6 +1,7 @@
 from alembic import context
 from sqlalchemy.engine import make_url
 
+from app.assessments import models as assessment_models  # noqa: F401
 from app.config import Settings
 from app.database import database_engine
 from app.models import Base

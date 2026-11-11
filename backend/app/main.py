@@ -10,6 +10,11 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
 from .auth_routes import router as auth_router
+from .assessments.routes import router as assessments_router
+from .business.routes import router as business_router
+from .market_preferences.routes import router as preferences_router
+from .opportunities.routes import router as opportunities_router
+from .workspace.routes import router as workspace_router
 from .config import Settings
 from .database import database_engine
 from .security import Principal, require_principal
@@ -37,7 +42,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=True,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PUT"],
         allow_headers=["Content-Type"],
     )
 
@@ -103,6 +108,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     ):
         api.include_router(auth_router)
 
+    api.include_router(business_router)
+    api.include_router(workspace_router)
+    api.include_router(preferences_router)
+    api.include_router(opportunities_router)
+    api.include_router(assessments_router)
     return api
 
 
