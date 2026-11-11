@@ -14,6 +14,54 @@ const demoBusiness = {
   sector: "Packaged food",
 };
 
+test("shared footer hides redundant authenticated action on account and public pages", async ({
+  page,
+}) => {
+  await mockWorkspace(page, [demoBusiness]);
+  await page.goto("/account");
+  await expect(
+    page.getByRole("heading", { name: "Welcome to Kobentra." }),
+  ).toBeVisible();
+  await expect(
+    page.locator("footer").getByRole("link", { name: "Go to my account" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "My account", exact: true }).first(),
+  ).toBeVisible();
+  await page
+    .getByRole("link", { name: "Platform", exact: true })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/platform$/);
+  await expect(
+    page.locator("footer").getByRole("link", { name: "Go to my account" }),
+  ).toHaveCount(0);
+});
+
+test("unauthenticated mobile footer keeps signup and sign-in navigation", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route("**/api/auth/me", (route) =>
+    route.fulfill({ status: 401, json: {} }),
+  );
+  await page.goto("/signin");
+  const action = page
+    .locator("footer")
+    .getByRole("link", { name: "Start your next chapter" });
+  await expect(action).toHaveAttribute("href", "/signup");
+  await action.scrollIntoViewIfNeeded();
+  await expect(action).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Sign in", exact: true }).first(),
+  ).toHaveAttribute("href", "/signin");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
+
 test("computed fictional match, explanations, privacy and introduction guard", async ({
   page,
 }) => {
@@ -22,6 +70,9 @@ test("computed fictional match, explanations, privacy and introduction guard", a
     route.fulfill({ json: fixture }),
   );
   await page.goto("/workspace/org-a/discover");
+  await expect(
+    page.locator("footer").getByRole("link", { name: "Go to my account" }),
+  ).toHaveCount(0);
   const card = page.getByRole("article", {
     name: fixture.matches[0].partner.name,
   });
@@ -69,6 +120,9 @@ test("mobile dark theme, reduced motion and keyboard disclosure", async ({
   );
   await page.goto("/workspace/org-a/discover");
   await page.getByRole("button", { name: "Use dark theme" }).click();
+  await expect(
+    page.locator("footer").getByRole("link", { name: "Go to my account" }),
+  ).toHaveCount(0);
   const summary = page.getByText("Evidence limitations & qualification gaps", {
     exact: true,
   });

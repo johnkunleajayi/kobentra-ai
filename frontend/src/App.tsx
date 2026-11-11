@@ -196,7 +196,7 @@ function Layout() {
             <br />
             Connected by possibility.
           </p>
-          <Cta>Start your next chapter</Cta>
+          {!user && <Cta>Start your next chapter</Cta>}
         </div>
         <div className="footer-bottom">
           <span>

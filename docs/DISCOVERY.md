@@ -73,3 +73,14 @@ businesses and verify old results clear. The separate local database must remain
 selected for this demo; never copy the allowlist into a Neon-connected server.
 
 No production migrations or persistent demo preparations are part of automated validation.
+
+## Milestone 2K verification
+
+The shared footer now omits its signup/account CTA when the existing layout session
+state is authenticated. Guest signup and header sign-in navigation remain available;
+no additional authentication request is introduced. Focused browser coverage includes
+account/public-page footer behavior, desktop/mobile discovery, keyboard disclosure,
+loading/error/retry/empty states and business switching. Browser authentication and
+API transport are mocked using the actual engine-generated fictional response; this
+does not substitute for an approved persistent local Google-login demonstration.
+The existing local preparation commands above remain unchanged and require approval.
