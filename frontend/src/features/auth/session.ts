@@ -2,6 +2,7 @@ export interface AuthenticatedUser {
   id: string;
   email: string;
   authenticated: true;
+  capabilities?: { platform_admin: boolean };
 }
 
 export const API_BASE = (

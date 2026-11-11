@@ -1,0 +1,239 @@
+.admin-shell {
+  display: grid;
+  grid-template-columns: 235px minmax(0, 1fr);
+  max-width: 1600px;
+  margin: auto;
+  min-height: 680px;
+}
+.admin-sidebar {
+  padding: 36px 24px;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.admin-sidebar > strong {
+  font-size: 20px;
+  letter-spacing: -0.025em;
+}
+.admin-sidebar nav {
+  display: grid;
+  gap: 8px;
+}
+.admin-sidebar nav a {
+  padding: 13px 12px;
+  border-radius: 5px;
+  font-size: 13px;
+}
+.admin-sidebar nav a.active {
+  background: var(--soft);
+  box-shadow: inset 3px 0 var(--orange);
+  font-weight: 700;
+}
+.admin-sidebar > p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.admin-sidebar > a {
+  font-size: 13px;
+}
+.admin-content {
+  background: var(--soft);
+  padding: 44px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.admin-heading {
+  margin-bottom: 30px;
+}
+.admin-heading h1 {
+  font-size: clamp(32px, 4vw, 54px);
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+  margin: 18px 0;
+}
+.admin-heading p,
+.admin-note {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 680px;
+}
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.admin-stats article {
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--orange);
+  border-radius: 9px;
+  padding: 25px;
+  background: var(--bg);
+}
+.admin-stats span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.admin-stats strong {
+  display: block;
+  font-size: 48px;
+  letter-spacing: -0.05em;
+  margin-top: 18px;
+}
+.admin-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.admin-panel {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 26px;
+  margin-bottom: 22px;
+}
+.admin-panel h2 {
+  font-size: 23px;
+  letter-spacing: -0.025em;
+  margin: 0 0 20px;
+}
+.admin-panel p,
+.admin-panel li {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.admin-panel dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.admin-panel dd {
+  margin: 0;
+  text-align: right;
+}
+.admin-evidence-count {
+  font-size: 42px;
+}
+.admin-search {
+  margin: 24px 0;
+  max-width: 640px;
+}
+.admin-search label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.admin-search > div {
+  display: flex;
+  gap: 12px;
+}
+.admin-search input {
+  min-width: 0;
+  flex: 1;
+  background: var(--bg);
+  color: inherit;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 12px;
+}
+.admin-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 660px;
+  font-size: 13px;
+  text-align: left;
+}
+.admin-table th {
+  background: var(--soft);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.admin-table th,
+.admin-table td {
+  padding: 17px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.admin-table a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.admin-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  font-size: 12px;
+}
+.admin-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (max-width: 800px) {
+  .admin-shell {
+    grid-template-columns: 1fr;
+  }
+  .admin-sidebar {
+    padding: 24px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-sidebar nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .admin-content {
+    padding: 28px 20px;
+  }
+  .admin-summary-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-stats {
+    gap: 10px;
+  }
+  .admin-stats article {
+    padding: 18px 12px;
+  }
+  .admin-stats strong {
+    font-size: 34px;
+  }
+  .admin-pagination {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 420px) {
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+  .admin-stats article {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .admin-stats strong {
+    margin: 0;
+  }
+  .admin-search > div {
+    flex-wrap: wrap;
+  }
+  .admin-search input {
+    width: 100%;
+  }
+}

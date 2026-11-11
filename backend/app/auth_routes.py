@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from .admin.authorization import is_platform_owner
 from .auth_sessions import (
     create_session,
     get_active_session,
@@ -263,6 +264,7 @@ def authenticated_user(request: Request):
             "id": user.id,
             "email": user.email,
             "authenticated": True,
+            "capabilities": {"platform_admin": is_platform_owner(user, settings)},
         }
 
 

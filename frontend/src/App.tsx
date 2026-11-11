@@ -16,6 +16,7 @@ import { Link, NavLink, Route, Routes, useLocation, Navigate } from "react-route
 import { ArrowUpRight, Sun, Moon, Menu, X } from "lucide-react";
 import { Auth } from "./features/auth/Auth";
 import { Workspace } from "./features/demo/Workspace";
+import { AdminPortal } from "./features/admin/AdminPortal";
 const A = "/assets/";
 const pages = [
   ["/how-it-works", "How it works"],
@@ -89,6 +90,7 @@ function Layout() {
               {label}
             </NavLink>
           ))}
+          {user?.capabilities?.platform_admin === true && <NavLink onClick={() => setOpen(false)} to="/admin">Administration</NavLink>}
         </nav>
         <div className="header-actions">
           <button
@@ -130,6 +132,7 @@ function Layout() {
       </header>
       <main id="main" tabIndex={-1}>
         <Routes>
+          <Route path="/admin/*" element={<AdminPortal loading={authLoading} error={authError} signedIn={Boolean(user)} allowed={user?.capabilities?.platform_admin === true} />} />
           <Route path="/" element={<Home />} />
           <Route path="/how-it-works" element={<How />} />
           <Route path="/businesses" element={<Audience />} />

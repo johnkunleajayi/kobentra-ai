@@ -16,6 +16,14 @@ class Settings(BaseSettings):
         hide_input_in_errors=True,
     )
     app_env: Literal["development", "test"] = "development"
+    platform_owner_google_subject: SecretStr | None = None
+
+    @field_validator("platform_owner_google_subject")
+    @classmethod
+    def owner_subject(cls, value):
+        if value is not None and (not value.get_secret_value().strip() or len(value.get_secret_value()) > 255):
+            raise ValueError("Invalid platform-owner configuration")
+        return value
     # Explicit publication approval covers name/sector/country and derived market-interest compatibility.
     # Empty by default: registration alone does not consent to cross-tenant discovery.
     matching_discovery_business_ids: list[str] = []

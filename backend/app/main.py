@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
+from .admin.routes import router as admin_router
 from .assessments.native_routes import router as native_assessments_router
 from .assessments.routes import router as assessments_router
 from .auth_routes import router as auth_router
@@ -67,6 +68,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def request_id(request: Request, call_next):
         request.state.request_id = str(uuid4())
         response = await call_next(request)
+        if request.url.path.startswith("/api/admin/") or request.url.path == "/api/auth/me":
+            response.headers["Cache-Control"] = "no-store"
         response.headers["X-Request-ID"] = request.state.request_id
         return response
 
@@ -133,6 +136,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     api.include_router(native_assessments_router)
     api.include_router(qualification_router)
     api.include_router(matching_router)
+    api.include_router(admin_router)
     return api
 
 
