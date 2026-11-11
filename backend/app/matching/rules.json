@@ -1,0 +1,9 @@
+{
+  "version": "kobentra-matching-v1",
+  "minimum_coverage": 60,
+  "minimum_dimensions": 3,
+  "weights": {"intent": 30, "industry_capability": 25, "geography": 20, "operations": 15, "timing": 10},
+  "intent_aliases": {"buyer": "buyers", "supplier": "suppliers", "distributor": "distributors", "manufacturer": "manufacturers", "find buyers": "buyers", "buyers": "buyers", "find suppliers": "suppliers", "suppliers": "suppliers", "find distributors": "distributors", "distributors": "distributors", "find manufacturers": "manufacturers", "manufacturers": "manufacturers"},
+  "complementary_intents": [["buyers", "suppliers"], ["distributors", "manufacturers"]],
+  "industry_known_fraction": 0.5
+}

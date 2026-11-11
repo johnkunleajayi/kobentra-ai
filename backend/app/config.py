@@ -16,6 +16,18 @@ class Settings(BaseSettings):
         hide_input_in_errors=True,
     )
     app_env: Literal["development", "test"] = "development"
+    # Explicit publication approval covers name/sector/country and derived market-interest compatibility.
+    # Empty by default: registration alone does not consent to cross-tenant discovery.
+    matching_discovery_business_ids: list[str] = []
+
+    @field_validator("matching_discovery_business_ids")
+    @classmethod
+    def explicit_discovery_ids(cls, values):
+        from uuid import UUID
+
+        if len(values) > 200:
+            raise ValueError("Discovery directory exceeds local limit")
+        return sorted({str(UUID(value)) for value in values})
     database_url: SecretStr = SecretStr("sqlite+pysqlite:///./kobentra-local.db")
     cors_origins: list[str] = ["http://127.0.0.1:5173", "http://localhost:5173"]
 

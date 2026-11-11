@@ -17,6 +17,7 @@ from .business.routes import router as business_router
 from .config import Settings
 from .database import database_engine
 from .market_preferences.routes import router as preferences_router
+from .matching.routes import router as matching_router
 from .opportunities.routes import router as opportunities_router
 from .qualification.routes import router as qualification_router
 from .salesforce.client import SalesforceClient
@@ -131,6 +132,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     api.include_router(assessments_router)
     api.include_router(native_assessments_router)
     api.include_router(qualification_router)
+    api.include_router(matching_router)
     return api
 
 
