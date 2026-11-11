@@ -70,7 +70,9 @@ def test_private_by_default_authenticated_discovery_and_projection(setup, busine
         "/api/businesses", json={**INPUT, "name": "Partner", "country": "Nigeria"}, headers=ORIGIN
     )
     partner = created.json()["organization_id"]
+    from app.admin.models import BusinessAdministration
     with Session(setup[1]) as db:
+        db.add(BusinessAdministration(organization_id=partner, approval="approved"))
         db.add_all(
             [
                 MarketPreference(

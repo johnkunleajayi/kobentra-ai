@@ -111,7 +111,7 @@ def test_no_n_plus_one_queries(owner, setup, businesses):
     finally:
         event.remove(setup[1], "before_cursor_execute", capture)
     # Session auth + owner lookup + count + page + one batched owner lookup.
-    assert len(queries) <= 5
+    assert len(queries) <= 6  # One additional batched administrative-state lookup.
 
 
 def test_owner_revocation_is_authoritative(owner, setup):

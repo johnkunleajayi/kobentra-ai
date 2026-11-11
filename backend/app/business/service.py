@@ -26,6 +26,8 @@ def register_business(
             created = profile is None
             if created:
                 profile = repository.create_business(db, user_id, data)
+            from ..admin.eligibility import require_operational
+            require_operational(db, profile.organization_id)
             result = repository.summarize(profile, "owner")
         return result, created
     except SQLAlchemyError:

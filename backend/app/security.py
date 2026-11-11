@@ -56,6 +56,9 @@ def authorize(
     if write and member.role not in {"owner", "admin"}:
         raise HTTPException(403, detail="Access denied")
 
+    from .admin.eligibility import require_operational
+    require_operational(session, organization_id)
+
     return member
 
 

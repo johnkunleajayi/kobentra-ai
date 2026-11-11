@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
+from .admin.mutation_routes import router as admin_mutation_router
 from .admin.routes import router as admin_router
 from .assessments.native_routes import router as native_assessments_router
 from .assessments.routes import router as assessments_router
@@ -137,6 +138,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     api.include_router(qualification_router)
     api.include_router(matching_router)
     api.include_router(admin_router)
+    api.include_router(admin_mutation_router)
     return api
 
 

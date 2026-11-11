@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy import select
 
+from ..admin.eligibility import discoverable, statuses
 from ..models import BusinessProfile
 from ..qualification.policy import MANDATORY_VERIFICATIONS, foundation, introduction_policy
 from ..security import authorize
@@ -19,6 +20,7 @@ def matches(db, principal, business_id, published_ids):
     if not qualification["policy"]["discovery_eligible"]:
         raise HTTPException(403, "Discovery is not permitted")
     candidates = []
+    source_state = qualification["administration"]
     source_inputs = repository.inputs(db, source)
     disputed = set(qualification["confidence"]["conflicting_claims"])
     # Only the requester's own evidence is consulted. Candidate private evidence is never read.
@@ -26,7 +28,12 @@ def matches(db, principal, business_id, published_ids):
         source_inputs["conflicts"] = list(RULES["weights"])
     elif "industry" in disputed:
         source_inputs["conflicts"] = ["industry_capability"]
-    for profile in repository.profiles(db, business_id, published_ids):
+    profiles = repository.profiles(db, business_id, published_ids)
+    administrative = statuses(db, [p.organization_id for p in profiles])
+    for profile in profiles:
+        state = administrative.get(profile.organization_id)
+        if state is None or not discoverable(state):
+            continue
         policy = introduction_policy(MANDATORY_VERIFICATIONS, ())
         if not policy["discovery_eligible"]:
             continue
@@ -46,12 +53,16 @@ def matches(db, principal, business_id, published_ids):
                 },
                 "compatibility": result,
                 "qualification_gaps": [
-                    "Independent business identity is unverified.",
+                    "Independent business identity is unverified."
+                    if state["identity"] != "verified"
+                    else "Independent identity decision recorded; commercial capabilities remain self-reported.",
                     "Capabilities, operational suitability and timing are not established for discovery.",
                 ],
                 "introduction_eligibility": {
                     "allowed": False,
-                    "missing_verifications": policy["missing_verifications"],
+                    "missing_verifications": []
+                    if state["identity"] == "verified" and source_state["identity"] == "verified"
+                    else policy["missing_verifications"],
                     "reason": "Both businesses require independent identity verification and consent.",
                 },
             }

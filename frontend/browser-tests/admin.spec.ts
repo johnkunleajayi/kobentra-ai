@@ -8,6 +8,12 @@ const business = {
   owners: [{ id: "test-owner", email: "owner@example.invalid" }],
   registered_at: null,
   business_status: "not_recorded",
+  administration: {
+    approval: "pending",
+    identity: "unverified",
+    access: "active",
+    version: 0,
+  },
 };
 const dashboard = {
   users: 21,
@@ -32,8 +38,69 @@ async function session(page: Page, admin: boolean) {
   );
 }
 async function api(page: Page) {
+  let record = structuredClone(business);
+  let profile = {
+    name: business.name,
+    country: business.country,
+    sector: business.industry,
+    goal: "Fictional test business goal",
+  };
+  const writes: Record<string, unknown>[] = [];
+  const history: Record<string, unknown>[] = [];
   await page.route("**/api/admin/**", (route) => {
     const url = new URL(route.request().url());
+    if (url.pathname.endsWith("/history"))
+      return route.fulfill({
+        json: { items: history, total: history.length, page: 1, page_size: 20 },
+      });
+    if (["POST", "PUT"].includes(route.request().method())) {
+      const body = route.request().postDataJSON();
+      writes.push(body);
+      const previous = structuredClone(record.administration);
+      if (body.profile) {
+        profile = body.profile;
+        record = {
+          ...record,
+          name: profile.name,
+          country: profile.country,
+          industry: profile.sector,
+        };
+        record.administration.identity = "unverified";
+        record.administration.approval = "pending";
+      } else {
+        const changes: Record<
+          string,
+          ["approval" | "identity" | "access", string]
+        > = {
+          approve: ["approval", "approved"],
+          reject: ["approval", "rejected"],
+          verify_identity: ["identity", "verified"],
+          revoke_identity: ["identity", "unverified"],
+          suspend: ["access", "suspended"],
+          reactivate: ["access", "active"],
+        };
+        const [key, value] = changes[body.action];
+        record.administration[key] = value;
+      }
+      record.administration.version++;
+      history.unshift({
+        id: String(writes.length),
+        actor_id: "test-owner",
+        action: body.action || "edit_profile",
+        reason: body.reason,
+        created_at: "2026-11-11T12:00:00Z",
+        evidence_references: body.evidence_references || [],
+        previous_values: previous,
+        new_values: structuredClone(record.administration),
+      });
+      return route.fulfill({
+        json: {
+          decision_id: String(writes.length),
+          version: record.administration.version,
+          replayed: false,
+        },
+      });
+    }
     if (url.pathname.endsWith("/dashboard"))
       return route.fulfill({ json: dashboard });
     if (url.pathname.endsWith("/users")) {
@@ -65,11 +132,12 @@ async function api(page: Page) {
     }
     if (url.pathname.endsWith("/businesses"))
       return route.fulfill({
-        json: { items: [business], total: 1, page: 1, page_size: 20 },
+        json: { items: [record], total: 1, page: 1, page_size: 20 },
       });
     return route.fulfill({
       json: {
-        ...business,
+        ...record,
+        profile,
         assessment_history_limit: 100,
         assessments: [],
         qualification: {
@@ -86,6 +154,7 @@ async function api(page: Page) {
       },
     });
   });
+  return { writes };
 }
 
 test("ordinary and signed-out users cannot enter admin or see navigation", async ({
@@ -146,12 +215,13 @@ test("owner dashboard, directory pagination and business details are read-only",
     page.getByText("No assessments recorded.", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: /approve|verify|suspend|edit|delete/i }),
-  ).toHaveCount(0);
+    page.getByRole("button", { name: "Approve", exact: true }),
+  ).toBeEnabled();
+  await expect(page.getByRole("button", { name: /delete/i })).toHaveCount(0);
   await page
     .getByRole("link", { name: "Business directory", exact: false })
     .click();
-  await expect(page.getByRole("table")).toContainText("Not recorded");
+  await expect(page.getByRole("table")).toContainText("pending");
 });
 
 test("mobile dark directory search, empty state and keyboard access", async ({
@@ -208,4 +278,119 @@ test("loading, denial error and retry remain safe even with frontend capability"
   await expect(
     page.getByText("Registered users", { exact: true }),
   ).toBeVisible();
+});
+
+test("administrative dialogs require reasons, record decisions and edit supported fields", async ({
+  page,
+}) => {
+  await session(page, true);
+  const mock = await api(page);
+  await page.goto(`/admin/businesses/${business.id}`);
+  await page.getByRole("button", { name: "Approve", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Confirm decision", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  expect(mock.writes.length).toBe(0);
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  for (const label of [
+    "Approve",
+    "Verify identity",
+    "Suspend",
+    "Reactivate",
+    "Revoke verification",
+    "Reject",
+  ]) {
+    await page.getByRole("button", { name: label, exact: true }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog
+      .getByLabel("Required decision reason")
+      .fill(`Fictional browser review: ${label}`);
+    if (label === "Verify identity")
+      await dialog
+        .getByLabel("Independent evidence references (one per line)")
+        .fill("local-review:fictional-example");
+    await dialog.getByRole("button", { name: "Confirm decision" }).click();
+    await expect(
+      page.getByText("Administrative decision saved.", { exact: true }),
+    ).toBeVisible();
+  }
+  await page
+    .getByRole("button", { name: "Edit business", exact: true })
+    .click();
+  await page
+    .getByLabel("Business name", { exact: true })
+    .fill("Fictional Updated Business");
+  await page
+    .getByLabel("Business description / goal", { exact: true })
+    .fill("Fictional updated description");
+  await page
+    .getByLabel("Required decision reason")
+    .fill("Correct fictional profile");
+  await page
+    .getByRole("button", { name: "Confirm decision", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Fictional Updated Business" }),
+  ).toBeVisible();
+  expect(mock.writes.length).toBe(7);
+  await expect(page.getByLabel("Administrative statuses")).toContainText(
+    "Approval: pending",
+  );
+  await expect(
+    page.getByRole("heading", { name: "Administrative decision history" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Correct fictional profile", { exact: true }),
+  ).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Use dark theme" }).click();
+  await page
+    .getByRole("button", { name: "Verify identity", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "../work/admin-management-mobile.png",
+    fullPage: true,
+  });
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
+
+test("failed decision preserves a safe identical retry", async ({ page }) => {
+  await session(page, true);
+  await api(page);
+  const ids: string[] = [];
+  await page.route("**/api/admin/businesses/*/decisions", (route) => {
+    ids.push(route.request().postDataJSON().request_id);
+    return ids.length === 1
+      ? route.fulfill({ status: 503, body: "private write error" })
+      : route.fallback();
+  });
+  await page.goto(`/admin/businesses/${business.id}`);
+  await page.getByRole("button", { name: "Approve", exact: true }).click();
+  await page
+    .getByLabel("Required decision reason")
+    .fill("Retry fictional decision");
+  await page
+    .getByRole("button", { name: "Confirm decision", exact: true })
+    .click();
+  await expect(page.getByRole("alert")).toContainText(
+    "Decision was not confirmed",
+  );
+  await expect(page.getByText("private write error")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Confirm decision", exact: true })
+    .click();
+  await expect(
+    page.getByText("Administrative decision saved.", { exact: true }),
+  ).toBeVisible();
+  expect(ids).toHaveLength(2);
+  expect(ids[0]).toBe(ids[1]);
 });

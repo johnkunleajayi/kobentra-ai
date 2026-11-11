@@ -1,5 +1,9 @@
 # Platform administration — 2L-A
 
+For 2L-B business mutations, current administrative states and required migration,
+see [ADMIN-MANAGEMENT.md](ADMIN-MANAGEMENT.md). This document describes the original
+read-only milestone; current business management is owner-authorized and audited.
+
 Owner-only read endpoints: `GET /api/admin/dashboard`, `/api/admin/users`,
 `/api/admin/businesses`, `/api/admin/businesses/{business_id}`. Listings accept
 `q` (max 100 characters), `page` (1–100000), `page_size` (1–100; default 20).

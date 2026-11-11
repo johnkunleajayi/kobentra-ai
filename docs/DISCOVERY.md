@@ -84,3 +84,6 @@ loading/error/retry/empty states and business switching. Browser authentication 
 API transport are mocked using the actual engine-generated fictional response; this
 does not substitute for an approved persistent local Google-login demonstration.
 The existing local preparation commands above remain unchanged and require approval.
+As of 2L-B, the platform owner must also explicitly approve the fictional candidate
+businesses through administration; the demo publication flag does not grant business
+approval. Missing decisions default to pending and are not discoverable.

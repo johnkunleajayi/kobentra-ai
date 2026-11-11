@@ -5,6 +5,8 @@ from sqlalchemy import func, or_, select
 from ..assessments.models import BusinessAssessment
 from ..models import BusinessProfile, Membership, Organization, User
 from ..qualification.models import AssessmentEvidence
+from .eligibility import statuses
+from .models import BusinessAdministration
 
 
 def count(db, model):
@@ -23,7 +25,12 @@ def summary(db):
         ),
         "qualification": {
             "self_reported_snapshots": count(db, AssessmentEvidence),
-            "independent_verification": "not_implemented",
+            "independent_verification": "platform_owner_decisions",
+            "verified_business_identities": db.scalar(
+                select(func.count())
+                .select_from(BusinessAdministration)
+                .where(BusinessAdministration.identity == "verified")
+            ),
         },
     }
 
@@ -103,8 +110,18 @@ def businesses(db, query, page, page_size):
         page_size,
     )
     owned = owners(db, [r.organization_id for r in rows])
+    states = statuses(db, [r.organization_id for r in rows])
     return {
-        "items": [profile_summary(r, owned[r.organization_id]) for r in rows],
+        "items": [
+            {
+                **profile_summary(r, owned[r.organization_id]),
+                "administration": states.get(
+                    r.organization_id,
+                    dict(approval="pending", identity="unverified", access="active", version=0),
+                ),
+            }
+            for r in rows
+        ],
         "total": total,
         "page": page,
         "page_size": page_size,

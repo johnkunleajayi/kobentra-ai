@@ -6,6 +6,7 @@ from ..models import BusinessProfile, MarketPreference
 from ..qualification.models import AssessmentEvidence
 from ..qualification.provider import MAPPING
 from ..qualification.scoring import evaluate
+from .eligibility import status
 from .repository import owners, profile_summary
 
 
@@ -36,6 +37,11 @@ def business_detail(db, business_id):
         )
     )
     qualification = evaluate(evidence, profile, preferences)
+    state = status(db, business_id)
+    if state["identity"] == "verified":
+        qualification["qualification_gaps"] = [
+            g for g in qualification["qualification_gaps"] if g["code"] != "business_identity"
+        ]
     # Summary only: no raw/normalized answers, provider IDs, recipient contacts or dispatch payload.
     assessments = list(
         db.scalars(
@@ -47,6 +53,8 @@ def business_detail(db, business_id):
     )
     return {
         **profile_summary(profile, owners(db, [business_id])[business_id]),
+        "administration": state,
+        "profile": {key: getattr(profile, key) for key in ("name", "sector", "country", "goal")},
         "assessment_history_limit": 100,
         "assessments": [
             {

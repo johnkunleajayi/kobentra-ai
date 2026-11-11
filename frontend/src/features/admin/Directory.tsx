@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useResource } from "../workspace/useResource";
 import { ResourceState } from "../workspace/ResourceState";
+import { StatusBadges } from "./StatusBadges";
 import {
   dateLabel,
   type AdminPage,
@@ -127,7 +128,9 @@ export function AdminDirectory({ kind }: { kind: "users" | "businesses" }) {
                               "Not recorded"}
                           </td>
                           <td>{dateLabel(item.registered_at)}</td>
-                          <td>{item.business_status.replace(/_/g, " ")}</td>
+                          <td>
+                            <StatusBadges value={item.administration} />
+                          </td>
                         </>
                       )}
                     </tr>

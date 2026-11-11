@@ -1,3 +1,4 @@
+import type { Administration, EditableProfile } from "./management-types";
 export interface AdminUser {
   id: string;
   email: string;
@@ -11,6 +12,7 @@ export interface AdminBusiness {
   industry: string;
   registered_at: string | null;
   business_status: string;
+  administration?: Administration;
   owners: { id: string; email: string }[];
 }
 export interface AdminPage<T> {
@@ -30,6 +32,7 @@ export interface Dashboard {
   };
 }
 export interface BusinessDetail extends AdminBusiness {
+  profile?: EditableProfile;
   assessment_history_limit: number;
   assessments: {
     id: string;

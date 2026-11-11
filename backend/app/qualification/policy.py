@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy import select
 
+from ..admin.eligibility import status
 from ..assessments.models import BusinessAssessment
 from ..models import BusinessProfile, MarketPreference
 from ..security import authorize
@@ -23,17 +24,18 @@ def introduction_policy(required, independently_verified):
 def require_introduction_evidence(db, principal, business_id):
     """Future real introduction endpoints must call this server-side gate.
 
-    No independent verification source is implemented yet. A completed survey is
-    evidence of self-reporting, never evidence that identity/capabilities are true.
+    Owner identity decisions are independent of survey self-reporting. Even a
+    verified identity cannot bypass the unimplemented mutual-consent workflow.
     """
     authorize(db, principal, business_id, write=True)
-    policy = introduction_policy(MANDATORY_VERIFICATIONS, independently_verified=())
-    if not policy["introduction_allowed"]:
+    if status(db, business_id)["identity"] != "verified":
         raise HTTPException(409, "Mandatory independent verification is missing")
+    raise HTTPException(409, "Mutual introduction consent workflow is not implemented")
 
 
 def foundation(db, principal, business_id):
     authorize(db, principal, business_id)
+    administration = status(db, business_id)
     profile = db.scalar(
         select(BusinessProfile).where(BusinessProfile.organization_id == business_id)
     )
@@ -67,6 +69,23 @@ def foundation(db, principal, business_id):
         )
     )
     qualification = evaluate(eligible, profile, prefs)
+    if administration["identity"] == "verified":
+        gaps = [gap for gap in gaps if gap != "business_identity"]
+        qualification["qualification_gaps"] = [
+            g for g in qualification["qualification_gaps"] if g["code"] != "business_identity"
+        ]
+        qualification["recommendations"] = [
+            g["recommendation"] for g in qualification["qualification_gaps"]
+        ]
+    policy = introduction_policy(
+        MANDATORY_VERIFICATIONS,
+        ("business_identity",) if administration["identity"] == "verified" else (),
+    )
+    policy["discovery_eligible"] = (
+        administration["approval"] != "rejected" and administration["access"] == "active"
+    )
+    policy["introduction_allowed"] = False
+    policy["missing_requirements"] = ["mutual_consent_workflow"]
     return {
         "organization_id": business_id,
         "profile": {
@@ -88,10 +107,15 @@ def foundation(db, principal, business_id):
             }
             for r in evidence
         ],
-        "independently_verified_evidence": [],
+        "independently_verified_evidence": [
+            {"claim": "business_identity", "source": "platform_owner_decision"}
+        ]
+        if administration["identity"] == "verified"
+        else [],
         "supporting_evidence_status": "not_implemented",
         "disclosed_gaps": gaps,
-        "policy": introduction_policy(MANDATORY_VERIFICATIONS, ()),
+        "policy": policy,
+        "administration": administration,
         "score": None,
         "matching_algorithm": "not_implemented",
         **qualification,

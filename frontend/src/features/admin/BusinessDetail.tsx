@@ -1,10 +1,13 @@
 import { Link, useParams } from "react-router-dom";
+import { useState } from "react";
 import { ResourceState } from "../workspace/ResourceState";
 import { useResource } from "../workspace/useResource";
 import { dateLabel, type BusinessDetail } from "./types";
+import { BusinessManagement } from "./BusinessManagement";
 
 export function AdminBusinessDetail() {
   const { businessId = "" } = useParams();
+  const [savedBusiness, setSavedBusiness] = useState("");
   const resource = useResource<BusinessDetail>(
     `/api/admin/businesses/${encodeURIComponent(businessId)}`,
   );
@@ -16,12 +19,23 @@ export function AdminBusinessDetail() {
     <>
       <Link to="/admin/businesses">← Business directory</Link>
       <header className="admin-heading">
-        <span className="eyebrow">READ-ONLY BUSINESS RECORD</span>
+        <span className="eyebrow">BUSINESS ADMINISTRATION</span>
         <h1>{business.name}</h1>
         <p>
           {business.country} · {business.industry}
         </p>
       </header>
+      {savedBusiness === businessId && (
+        <p role="status">Administrative decision saved.</p>
+      )}
+      <BusinessManagement
+        key={businessId}
+        business={business}
+        refresh={() => {
+          setSavedBusiness(businessId);
+          resource.retry();
+        }}
+      />
       <section className="admin-panel">
         <h2>Ownership & registration</h2>
         <dl>
@@ -34,10 +48,6 @@ export function AdminBusinessDetail() {
           <div>
             <dt>Registered</dt>
             <dd>{dateLabel(business.registered_at)}</dd>
-          </div>
-          <div>
-            <dt>Status</dt>
-            <dd>{business.business_status.replace(/_/g, " ")}</dd>
           </div>
         </dl>
       </section>

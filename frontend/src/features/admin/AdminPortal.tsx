@@ -56,9 +56,9 @@ export function AdminPortal({
         </nav>
         <Link to="/account">Return to account</Link>
         <p>
-          Read-only access.
+          Owner-authorized administration.
           <br />
-          No records can be changed here.
+          Business decisions require a reason and audit record.
         </p>
       </aside>
       <div className="admin-content">

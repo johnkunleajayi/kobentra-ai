@@ -22,6 +22,7 @@ def tenant_write(db: Session, principal: Principal, organization_id: str):
             )
             if organization is None:
                 raise HTTPException(404, "Business not found")
+            authorize(db, principal, organization_id, write=True)
             yield
     except SQLAlchemyError:
         raise HTTPException(503, "Workspace write unavailable") from None

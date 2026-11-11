@@ -5,6 +5,92 @@
   margin: auto;
   min-height: 680px;
 }
+.admin-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+}
+.admin-statuses span {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 6px 10px;
+  background: var(--soft);
+}
+.admin-management-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.admin-management-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.admin-dialog {
+  background: var(--bg);
+  color: inherit;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  width: min(620px, calc(100% - 32px));
+  max-height: 90vh;
+  padding: 28px;
+}
+.admin-dialog::backdrop {
+  background: rgb(11 18 32 / 0.65);
+}
+.admin-dialog h2 {
+  font-size: 26px;
+}
+.admin-dialog p,
+.admin-dialog small {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.admin-dialog fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.admin-dialog label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  margin: 18px 0;
+}
+.admin-dialog input,
+.admin-dialog textarea {
+  width: 100%;
+  background: var(--soft);
+  color: inherit;
+  border: 1px solid var(--line);
+  padding: 12px;
+  border-radius: 5px;
+}
+.admin-dialog textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.admin-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.admin-history {
+  padding-left: 22px;
+}
+.admin-history > li {
+  border-bottom: 1px solid var(--line);
+  padding: 15px 0;
+}
+.admin-history pre {
+  overflow: auto;
+  max-height: 260px;
+  background: var(--soft);
+  padding: 15px;
+  font-size: 11px;
+}
 .admin-sidebar {
   padding: 36px 24px;
   background: var(--bg);

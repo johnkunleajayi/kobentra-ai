@@ -40,6 +40,11 @@ def test_repeatable_fictional_demo_uses_real_engine_and_isolation(setup, monkeyp
     assert discovery.prepare(url, "alice", True) == approved
     ids = approved["business_ids"]
     with Session(engine) as db:
+        # Publication approval no longer substitutes for a platform-owner business decision.
+        assert matches(db, Principal("alice"), ids[0], ids)["matches"] == []
+        from app.admin.models import BusinessAdministration
+        db.add_all([BusinessAdministration(organization_id=i, approval="approved") for i in ids])
+        db.commit()
         assert db.scalar(select(func.count()).select_from(Organization)) == 2
         assert db.scalar(select(func.count()).select_from(Membership)) == 2
         assert all(
