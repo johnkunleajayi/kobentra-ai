@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 from typing import Annotated
 from uuid import uuid4
 
@@ -9,24 +10,38 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
-from .auth_routes import router as auth_router
+from .assessments.native_routes import router as native_assessments_router
 from .assessments.routes import router as assessments_router
+from .auth_routes import router as auth_router
 from .business.routes import router as business_router
-from .market_preferences.routes import router as preferences_router
-from .opportunities.routes import router as opportunities_router
-from .workspace.routes import router as workspace_router
 from .config import Settings
 from .database import database_engine
+from .market_preferences.routes import router as preferences_router
+from .opportunities.routes import router as opportunities_router
+from .salesforce.client import SalesforceClient
 from .security import Principal, require_principal
+from .workspace.routes import router as workspace_router
 
 logger = logging.getLogger("kobentra")
 
 
+@asynccontextmanager
+async def lifespan(api):
+    client = api.state.salesforce_client
+    try:
+        yield
+    finally:
+        client.close()
+        if api.state.salesforce_client is not client:
+            api.state.salesforce_client.close()
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
-    api = FastAPI(title="Kobentra API", version="0.1.0")
+    api = FastAPI(title="Kobentra API", version="0.1.0", lifespan=lifespan)
     api.state.settings = settings
     api.state.database_engine = database_engine(settings)
+    api.state.salesforce_client = SalesforceClient(settings)
     # Temporary signed OAuth state storage.
     # Production must use HTTPS and secure cookies.
     if settings.oauth_session_secret:
@@ -113,6 +128,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     api.include_router(preferences_router)
     api.include_router(opportunities_router)
     api.include_router(assessments_router)
+    api.include_router(native_assessments_router)
     return api
 
 

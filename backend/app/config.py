@@ -32,6 +32,41 @@ class Settings(BaseSettings):
     session_lifetime_hours: int = 24
     frontend_url: str = "http://127.0.0.1:5173"
     surveyvista_launch_url: str | None = PUBLIC_URL
+    salesforce_instance_url: str | None = None
+    salesforce_client_id: SecretStr | None = None
+    salesforce_client_secret: SecretStr | None = None
+    salesforce_dispatch_enabled: bool = False
+    salesforce_result_survey_field: str | None = None
+    salesforce_result_status_field: str | None = None
+
+    @field_validator("salesforce_result_survey_field", "salesforce_result_status_field")
+    @classmethod
+    def salesforce_field_name(cls, value):
+        import re
+
+        if value is not None and not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", value):
+            raise ValueError("Invalid Salesforce field API name")
+        return value
+
+    @field_validator("salesforce_instance_url")
+    @classmethod
+    def salesforce_origin(cls, value):
+        from urllib.parse import urlparse
+
+        if value is None:
+            return None
+        parsed = urlparse(value)
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or not parsed.hostname.endswith(".my.salesforce.com")
+            or parsed.netloc != parsed.hostname
+            or parsed.path not in {"", "/"}
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise ValueError("Salesforce requires an HTTPS My Domain origin")
+        return value.rstrip("/")
 
     @field_validator("surveyvista_launch_url")
     @classmethod

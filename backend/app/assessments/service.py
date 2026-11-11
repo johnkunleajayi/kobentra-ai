@@ -5,6 +5,7 @@ from ..config import Settings
 from ..security import Principal, scoped_get, scoped_list
 from ..workspace.transactions import tenant_write
 from .constants import ASSESSMENT_TYPE
+from .dispatch import SURVEY_ID
 from .models import BusinessAssessment
 from .provider import configured_survey
 from .repository import pending
@@ -29,7 +30,10 @@ def read_assessment(db: Session, principal: Principal, business_id: str, assessm
 
 def initiate(db: Session, principal: Principal, business_id: str, settings: Settings):
     with tenant_write(db, principal, business_id):
-        _, survey, logical = configured_survey(settings)
+        if settings.salesforce_dispatch_enabled:
+            survey, logical = SURVEY_ID, "salesforce_flow"
+        else:
+            _, survey, logical = configured_survey(settings)
         record = pending(db, business_id, survey, logical)
         created = record is None
         if created:
@@ -40,6 +44,9 @@ def initiate(db: Session, principal: Principal, business_id: str, settings: Sett
                 provider_survey_id=survey,
                 provider_logical_id=logical,
                 initiated_by=principal.user_id,
+                integration_mode="salesforce_flow"
+                if settings.salesforce_dispatch_enabled
+                else "shared_public_link",
             )
             db.add(record)
             db.flush()
@@ -52,6 +59,10 @@ def launch(
 ):
     with tenant_write(db, principal, business_id):
         record = scoped_get(db, BusinessAssessment, principal, business_id, assessment_id)
+        if settings.salesforce_dispatch_enabled or record.integration_mode == "salesforce_flow":
+            raise HTTPException(
+                409, "Native invitations are dispatched by email, not a public link"
+            )
         if record.status not in {"initiated", "launch_requested"}:
             raise HTTPException(409, "A verified assessment cannot be relaunched")
         url, survey, logical = configured_survey(settings)

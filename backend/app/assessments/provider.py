@@ -8,6 +8,16 @@ from .schemas import ProviderConfiguration
 
 
 def configuration(settings: Settings) -> ProviderConfiguration:
+    if settings.salesforce_dispatch_enabled:
+        return ProviderConfiguration(
+            title=TITLE,
+            configured=bool(
+                settings.salesforce_instance_url
+                and settings.salesforce_client_id
+                and settings.salesforce_client_secret
+            ),
+            synchronization="salesforce_flow",
+        )
     return ProviderConfiguration(title=TITLE, configured=bool(settings.surveyvista_launch_url))
 
 

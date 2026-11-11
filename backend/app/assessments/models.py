@@ -1,6 +1,6 @@
-﻿from datetime import datetime, timezone
+from datetime import datetime, timezone
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, UniqueConstraint
+from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..models import Base, TenantRow
@@ -23,12 +23,24 @@ class BusinessAssessment(TenantRow, Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     synchronized_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     integration_mode: Mapped[str] = mapped_column(String(40), default="shared_public_link")
+    salesforce_lead_id: Mapped[str | None] = mapped_column(String(18))
+    correlation_id: Mapped[str | None] = mapped_column(String(36))
+    dispatch_state: Mapped[str | None] = mapped_column(String(20))
+    dispatch_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    dispatch_payload: Mapped[dict | None] = mapped_column(JSON)
     __table_args__ = (
         CheckConstraint("business_id = organization_id", name="assessment_business_tenant"),
         CheckConstraint("provider = 'surveyvista'", name="assessment_provider"),
         CheckConstraint(
-            "integration_mode = 'shared_public_link'", name="assessment_integration_mode"
+            "integration_mode IN ('shared_public_link','salesforce_flow')",
+            name="assessment_integration_mode",
         ),
+        CheckConstraint(
+            "dispatch_state IS NULL OR dispatch_state IN ('sending','uncertain','sent')",
+            name="assessment_dispatch_state",
+        ),
+        UniqueConstraint("salesforce_lead_id", name="uq_assessment_lead"),
+        UniqueConstraint("correlation_id", name="uq_assessment_correlation"),
         CheckConstraint(
             "status IN ('initiated','launch_requested','completed_verified')",
             name="assessment_status",
@@ -44,4 +56,3 @@ class BusinessAssessment(TenantRow, Base):
             "provider", "provider_response_id", name="uq_assessment_provider_response"
         ),
     )
-
