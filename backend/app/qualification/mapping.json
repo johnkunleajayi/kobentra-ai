@@ -1,0 +1,56 @@
+{
+  "survey_id": "a0Zaj00000JUZOnEAP",
+  "extraction_version": "surveyvista-v1",
+  "questions": {
+    "a0Qaj0000146qxBEAQ": {
+      "key": "registered_name",
+      "type": "Text-Short",
+      "definition_hash": "2704f06f982b38ec7be6de54feb5c40398a01235d7427e8f0b95a66e5144ad35"
+    },
+    "a0Qaj0000146rGXEAY": {
+      "key": "primary_country",
+      "type": "Polar-Radio",
+      "definition_hash": "50ff82533d7f9150f542fd9c0551578ea757df8b9579894d93710f8055f29b33"
+    },
+    "a0Qaj0000146rYHEAY": {
+      "key": "industry",
+      "type": "Polar-Radio",
+      "definition_hash": "ab5424474a8d931c19c2556d7d41079708d2a03b3fe2f9323f16e2dd24466e4c"
+    },
+    "a0Qaj00001470JpEAI": {
+      "key": "partnership_types",
+      "type": "Multiple Choice",
+      "definition_hash": "0e4f50fff6626ff31fe3f920f73b113a000dcf126383183e53b0f5ce05d39b26"
+    },
+    "a0Qaj00001470ZxEAI": {
+      "key": "markets_served",
+      "type": "Multiple Choice",
+      "definition_hash": "c76a3d031c9aabd839aa5c43611b8ed936c82af6d235cfc0d2642cbb96b481b9"
+    },
+    "a0Qaj0000146fk2EAA": {
+      "key": "years_operating",
+      "type": "Number",
+      "definition_hash": "f2a423fba81d8acb367d7c498387eae288074355169c027ba8a80ffb11196b02"
+    },
+    "a0Qaj0000146dbtEAA": {
+      "key": "operational_capacity",
+      "type": "Polar-Radio",
+      "definition_hash": "7642c048126800aac982e9dd1278d649261152ad63647e00451ecb2a4f31e77d"
+    },
+    "a0Qaj0000146X06EAE": {
+      "key": "cross_border_experience",
+      "type": "Polar-Yes/No",
+      "definition_hash": "ec0ddaf044b9d6597e49340adb21358fa553a62e2c19dbbd13a60f9818f2ce61"
+    },
+    "a0Qaj00001471ivEAA": {
+      "key": "readiness_timeline",
+      "type": "Polar-Radio",
+      "definition_hash": "eed500fdaa313cd2a23343c86ebb4171fd90d4910f308caddc551c1258d86383"
+    },
+    "a0Qaj00001471m9EAA": {
+      "key": "capabilities",
+      "type": "Text-Long",
+      "definition_hash": "50336294613ad984f2247e2b25dcab815abd4526382c7d7816d5b50c801b0e69"
+    }
+  }
+}

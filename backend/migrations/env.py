@@ -5,6 +5,7 @@ from app.assessments import models as assessment_models  # noqa: F401
 from app.config import Settings
 from app.database import database_engine
 from app.models import Base
+from app.qualification import models as qualification_models  # noqa: F401
 
 settings = Settings()
 # Never put the credential-bearing URL into Alembic's interpolated config/logs.

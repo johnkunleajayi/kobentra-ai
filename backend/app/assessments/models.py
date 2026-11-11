@@ -40,6 +40,7 @@ class BusinessAssessment(TenantRow, Base):
             name="assessment_dispatch_state",
         ),
         UniqueConstraint("salesforce_lead_id", name="uq_assessment_lead"),
+        UniqueConstraint("id", "organization_id", name="uq_assessment_id_org"),
         UniqueConstraint("correlation_id", name="uq_assessment_correlation"),
         CheckConstraint(
             "status IN ('initiated','launch_requested','completed_verified')",
