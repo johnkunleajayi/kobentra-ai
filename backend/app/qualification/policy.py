@@ -1,9 +1,12 @@
 from fastapi import HTTPException
 from sqlalchemy import select
 
+from ..assessments.models import BusinessAssessment
 from ..models import BusinessProfile, MarketPreference
 from ..security import authorize
 from .models import AssessmentEvidence
+from .provider import MAPPING
+from .scoring import evaluate
 
 MANDATORY_VERIFICATIONS = ("business_identity",)
 
@@ -45,6 +48,25 @@ def foundation(db, principal, business_id):
     gaps = sorted({gap for row in evidence for gap in row.gaps} | set(MANDATORY_VERIFICATIONS))
     if not evidence:
         gaps.append("assessment_answers_not_ingested")
+    eligible = list(
+        db.scalars(
+            select(AssessmentEvidence)
+            .join(
+                BusinessAssessment,
+                (BusinessAssessment.id == AssessmentEvidence.assessment_id)
+                & (BusinessAssessment.organization_id == AssessmentEvidence.organization_id),
+            )
+            .where(
+                AssessmentEvidence.organization_id == business_id,
+                BusinessAssessment.status == "completed_verified",
+                BusinessAssessment.integration_mode == "salesforce_flow",
+                BusinessAssessment.provider_survey_id == MAPPING["survey_id"],
+                BusinessAssessment.provider_response_id == AssessmentEvidence.provider_response_id,
+            )
+            .order_by(AssessmentEvidence.id)
+        )
+    )
+    qualification = evaluate(eligible, profile, prefs)
     return {
         "organization_id": business_id,
         "profile": {
@@ -72,4 +94,5 @@ def foundation(db, principal, business_id):
         "policy": introduction_policy(MANDATORY_VERIFICATIONS, ()),
         "score": None,
         "matching_algorithm": "not_implemented",
+        **qualification,
     }

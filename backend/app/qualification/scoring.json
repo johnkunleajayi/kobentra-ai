@@ -1,0 +1,14 @@
+{
+  "version": "kobentra-readiness-v1",
+  "declared_score": 70,
+  "identity_score": 100,
+  "no_cross_border_score": 60,
+  "thresholds": [[80, "Highly ready"], [60, "Ready with gaps"], [40, "Developing"], [0, "Early readiness"]],
+  "dimensions": {
+    "operational_readiness": {"weight": 30, "keys": ["years_operating", "operational_capacity"]},
+    "market_experience_and_coverage": {"weight": 25, "keys": ["markets_served", "cross_border_experience"]},
+    "partnership_readiness": {"weight": 20, "keys": ["partnership_types", "readiness_timeline"]},
+    "capabilities_and_commercial_fit": {"weight": 15, "keys": ["industry", "capabilities"]},
+    "business_identity_completeness": {"weight": 10, "keys": ["registered_name", "primary_country"]}
+  }
+}
