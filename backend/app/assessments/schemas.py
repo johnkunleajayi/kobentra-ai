@@ -31,6 +31,8 @@ class AssessmentSummary(BaseModel):
     integration_mode: str = "shared_public_link"
     salesforce_lead_id: str | None = None
     dispatch_state: str | None = None
+    processing_status: Literal["waiting", "ready", "retry", "needs_review"] | None = None
+    processing_message: str | None = None
 
     @field_validator("initiated_at", "completed_at", "synchronized_at")
     @classmethod

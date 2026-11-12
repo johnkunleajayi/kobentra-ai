@@ -18,8 +18,6 @@ export function BusinessManagement({
   const state = business.administration;
   if (!state || !business.profile) return null;
   const controls: [AdminAction, string, boolean][] = [
-    ["approve", "Approve", state.approval === "approved"],
-    ["reject", "Reject", state.approval === "rejected"],
     ["verify_identity", "Verify identity", state.identity === "verified"],
     ["revoke_identity", "Revoke verification", state.identity === "unverified"],
     ["suspend", "Suspend", state.access === "suspended"],
@@ -32,9 +30,10 @@ export function BusinessManagement({
         <h2>Business administration</h2>
         <StatusBadges value={state} />
         <p>
-          Approval, independent identity verification and operational access are
-          separate decisions. Publication approval and introduction safeguards
-          still apply.
+          Assessment completion enables provisional discovery automatically.
+          Historical approval and identity decisions are retained; suspension
+          still blocks business activity. Separate introduction safeguards
+          remain in force.
         </p>
         <div className="admin-management-actions">
           {controls.map(([key, label, disabled]) => (

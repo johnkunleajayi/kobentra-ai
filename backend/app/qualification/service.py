@@ -13,6 +13,11 @@ from .models import AssessmentEvidence
 from .provider import MAPPING, fetch_answers
 
 
+class EvidenceSourceUnavailable(HTTPException):
+    def __init__(self):
+        super().__init__(409, "Assessment source unavailable; evidence not overwritten")
+
+
 def snapshot(db, principal, business_id, assessment_id):
     scoped_get(db, BusinessAssessment, principal, business_id, assessment_id)
     row = db.scalar(
@@ -63,7 +68,9 @@ def ingest(db, principal, business_id, assessment_id, client):
                     {"answers": answers, "gaps": gaps}, sort_keys=True, allow_nan=False
                 ).encode()
             ).hexdigest()
-        except (SalesforceError, EvidenceConflict, ValueError, TypeError, KeyError, AttributeError):
+        except SalesforceError:
+            raise EvidenceSourceUnavailable() from None
+        except (EvidenceConflict, ValueError, TypeError, KeyError, AttributeError):
             raise HTTPException(
                 409,
                 "Assessment source is incomplete, malformed or changed; evidence not overwritten",

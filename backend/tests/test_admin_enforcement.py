@@ -33,7 +33,7 @@ def test_suspension_blocks_operations_but_admin_can_inspect(owner, setup, busine
     assert owner.get(f"/api/businesses/{businesses[0]}").status_code == 200
 
 
-def test_approval_allowlist_suspension_and_rejection_are_all_enforced(owner, setup, businesses):
+def test_approval_and_allowlist_do_not_substitute_for_assessments(owner, setup, businesses):
     from sqlalchemy import select
 
     from app.models import BusinessProfile
@@ -54,10 +54,8 @@ def test_approval_allowlist_suspension_and_rejection_are_all_enforced(owner, set
             ).status_code
             == 200
         )
-        assert len(owner.get(matches).json()["matches"]) == (
-            1 if action in {"approve", "reactivate"} else 0
-        )
-    assert owner.get(f"/api/businesses/{businesses[1]}/matches").status_code == 403
+        assert owner.get(matches).json()["matches"] == []
+    assert owner.get(f"/api/businesses/{businesses[1]}/matches").status_code == 200
     setup[0].app.state.settings.matching_discovery_business_ids = []
     assert (
         owner.post(url + "/decisions", json=decision("approve", 4), headers=ORIGIN).status_code

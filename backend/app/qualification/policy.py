@@ -2,12 +2,12 @@ from fastapi import HTTPException
 from sqlalchemy import select
 
 from ..admin.eligibility import status
-from ..assessments.models import BusinessAssessment
 from ..models import BusinessProfile, MarketPreference
 from ..security import authorize
+from .evidence import eligible as eligible_evidence
 from .models import AssessmentEvidence
-from .provider import MAPPING
 from .scoring import evaluate
+from .scoring_inputs import collect
 
 MANDATORY_VERIFICATIONS = ("business_identity",)
 
@@ -47,27 +47,13 @@ def foundation(db, principal, business_id):
             select(AssessmentEvidence).where(AssessmentEvidence.organization_id == business_id)
         )
     )
-    gaps = sorted({gap for row in evidence for gap in row.gaps} | set(MANDATORY_VERIFICATIONS))
+    gaps = sorted(
+        {gap for row in evidence for gap in row.gaps}
+        - {"business_identity", "cross_border_experience_development"}
+    )
     if not evidence:
         gaps.append("assessment_answers_not_ingested")
-    eligible = list(
-        db.scalars(
-            select(AssessmentEvidence)
-            .join(
-                BusinessAssessment,
-                (BusinessAssessment.id == AssessmentEvidence.assessment_id)
-                & (BusinessAssessment.organization_id == AssessmentEvidence.organization_id),
-            )
-            .where(
-                AssessmentEvidence.organization_id == business_id,
-                BusinessAssessment.status == "completed_verified",
-                BusinessAssessment.integration_mode == "salesforce_flow",
-                BusinessAssessment.provider_survey_id == MAPPING["survey_id"],
-                BusinessAssessment.provider_response_id == AssessmentEvidence.provider_response_id,
-            )
-            .order_by(AssessmentEvidence.id)
-        )
-    )
+    eligible = eligible_evidence(db, business_id)
     qualification = evaluate(eligible, profile, prefs)
     if administration["identity"] == "verified":
         gaps = [gap for gap in gaps if gap != "business_identity"]
@@ -81,8 +67,14 @@ def foundation(db, principal, business_id):
         MANDATORY_VERIFICATIONS,
         ("business_identity",) if administration["identity"] == "verified" else (),
     )
+    values, conflicts, issues = collect(eligible)
     policy["discovery_eligible"] = (
-        administration["approval"] != "rejected" and administration["access"] == "active"
+        administration["access"] == "active"
+        and bool(profile)
+        and bool(prefs)
+        and len(values) == 10
+        and not conflicts
+        and not issues
     )
     policy["introduction_allowed"] = False
     policy["missing_requirements"] = ["mutual_consent_workflow"]

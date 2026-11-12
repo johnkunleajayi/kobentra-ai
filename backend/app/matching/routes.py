@@ -12,6 +12,4 @@ def potential_matches(
     business_id: RecordID, principal: Identity, db: Database, request: Request, response: Response
 ):
     response.headers["Cache-Control"] = "no-store"
-    return matches(
-        db, principal, business_id, request.app.state.settings.matching_discovery_business_ids
-    )
+    return matches(db, principal, business_id)

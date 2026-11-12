@@ -34,7 +34,7 @@ def test_complementary_intent_geography_determinism_and_coverage():
     assert result == compare(a, b) == compare(b, a)
     assert (a, b) == original
     assert result["rules_version"] == "kobentra-matching-v1"
-    assert result["score"] == 100 and result["coverage_percent"] == 62.5
+    assert result["score"] == 100 and result["coverage_percent"] == 75
     assert sum(RULES["weights"].values()) == 100
     assert result["dimensions"][3]["state"] == "unknown"
     assert result["dimensions"][4]["state"] == "unknown"
@@ -89,14 +89,9 @@ def test_private_by_default_authenticated_discovery_and_projection(setup, busine
     response = client.get(path)
     assert response.status_code == 200 and response.headers["cache-control"] == "no-store"
     body = response.json()
-    assert len(body["matches"]) == 1
-    match = body["matches"][0]
-    assert set(match["partner"]) == {"business_id", "name", "sector", "country"}
-    assert match["compatibility"]["score"] == 100
-    assert match["introduction_eligibility"]["allowed"] is False
-    assert match["introduction_eligibility"]["missing_verifications"] == ["business_identity"]
+    # An allowlist or an approval cannot substitute for genuine assessment evidence.
+    assert body["matches"] == [] and body["discovery_eligible"] is False
     assert "normalized_value" not in response.text and "question_result_id" not in response.text
-    assert "goal" not in match["partner"] and "preferences" not in match["partner"]
     assert client.get(f"/api/businesses/{partner}").status_code == 403
     assert client.get(f"/api/businesses/{partner}/qualification").status_code == 403
     assert client.get(f"/api/businesses/{partner}/matches").status_code == 403

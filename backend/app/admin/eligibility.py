@@ -30,7 +30,8 @@ def require_operational(db, business_id):
 
 
 def discoverable(state):
-    return state["approval"] == "approved" and state["access"] == "active"
+    # MVP discovery is assessment-driven; legacy approval decisions remain audit history.
+    return state["access"] == "active"
 
 
 def statuses(db, ids):

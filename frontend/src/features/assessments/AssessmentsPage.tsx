@@ -25,6 +25,15 @@ export function AssessmentsPage({
   const history = useResource<{ assessments: Assessment[] }>(
     assessmentsPath(businessId),
   );
+  const refreshHistory = history.retry;
+  useEffect(() => {
+    const refresh = (event: Event) => {
+      if ((event as CustomEvent).detail === businessId) refreshHistory();
+    };
+    window.addEventListener("kobentra-assessment-processed", refresh);
+    return () =>
+      window.removeEventListener("kobentra-assessment-processed", refresh);
+  }, [businessId, refreshHistory]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [launch, setLaunch] = useState<Launch | null>(null);

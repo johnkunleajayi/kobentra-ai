@@ -1,6 +1,8 @@
 import { businessPath, jsonWrite, workspaceRequest } from "../workspace/api";
 
 export interface Assessment {
+  processing_status?: "waiting" | "ready" | "retry" | "needs_review";
+  processing_message?: string;
   id: string;
   organization_id: string;
   business_id: string;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { workspaceRequest } from "./api";
 
 export function useResource<T>(path: string) {
@@ -26,11 +26,12 @@ export function useResource<T>(path: string) {
     };
   }, [path, attempt]);
   const current = state.path === path ? state : { path };
+  const retry = useCallback(() => {
+    setState({ path });
+    setAttempt((n) => n + 1);
+  }, [path]);
   return {
     ...current,
-    retry: () => {
-      setState({ path });
-      setAttempt((n) => n + 1);
-    },
+    retry,
   };
 }

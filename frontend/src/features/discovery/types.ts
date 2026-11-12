@@ -31,7 +31,9 @@ export interface PartnerMatch {
 export interface DiscoveryResponse {
   business_id: string;
   rules_version: string;
-  directory_status: "curated_allowlist" | "not_configured";
+  directory_status: "automatic";
+  discovery_eligible?: boolean;
+  status_message?: string;
   matches: PartnerMatch[];
   requester_qualification_gaps: { code: string; recommendation: string }[];
 }

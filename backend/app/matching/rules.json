@@ -1,5 +1,8 @@
 {
   "version": "kobentra-matching-v1",
+  "revision": "assessment-mvp-1",
+  "capacity_bands": {"growing able to handle increasing customer demand": "growing"},
+  "timeline_windows": {"immediately": [0, 0], "within 1 3 months": [1, 3], "within 3 6 months": [3, 6], "within 6 12 months": [6, 12]},
   "minimum_coverage": 60,
   "minimum_dimensions": 3,
   "weights": {"intent": 30, "industry_capability": 25, "geography": 20, "operations": 15, "timing": 10},

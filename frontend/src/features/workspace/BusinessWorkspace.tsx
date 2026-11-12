@@ -18,6 +18,7 @@ import { useResource } from "./useResource";
 import { ResourceState } from "./ResourceState";
 import { BusinessSwitcher } from "./BusinessSwitcher";
 import { DiscoveryPage } from "../discovery/DiscoveryPage";
+import { AutomaticProcessing } from "../assessments/AutomaticProcessing";
 
 export function BusinessWorkspace() {
   const { businessId = "" } = useParams();
@@ -84,6 +85,7 @@ function WorkspaceContent({ businessId }: { businessId: string }) {
             <h1>{active.name}</h1>
           </div>
         </header>
+        <AutomaticProcessing businessId={businessId} writable={writable} />
         {!writable && (
           <p className="notice">Your membership has read-only access.</p>
         )}

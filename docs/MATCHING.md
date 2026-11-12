@@ -1,5 +1,8 @@
 # Matching v1
 
+> Historical milestone reference. The current automatic, assessment-driven policy
+> supersedes the allowlist/publication rules below: see [Hackathon MVP](HACKATHON-MVP.md).
+
 Authenticated `GET /api/businesses/{business_id}/matches` requires membership in
 the requesting organization. It is read-only, returns `Cache-Control: no-store`,
 and never initiates introductions. Readiness is not part of compatibility.

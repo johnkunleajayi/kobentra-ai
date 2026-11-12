@@ -84,10 +84,16 @@ test("computed fictional match, explanations, privacy and introduction guard", a
       exact: true,
     }),
   ).toBeVisible();
-  await expect(card.getByText("62.5%", { exact: true })).toBeVisible();
-  await expect(card.getByText("unknown", { exact: true })).toHaveCount(2);
   await expect(
-    card.getByText("Introduction restricted", { exact: true }),
+    card.getByText(`${fixture.matches[0].compatibility.coverage_percent}%`, {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    card.getByText(
+      "Potential partner, not a verified commercial relationship.",
+      { exact: false },
+    ),
   ).toBeVisible();
   await expect(card.getByRole("button")).toHaveCount(0);
   await card
@@ -95,7 +101,7 @@ test("computed fictional match, explanations, privacy and introduction guard", a
     .click();
   await expect(
     card.getByText(
-      "Private assessments are not used for cross-tenant discovery.",
+      "Only derived compatibility is disclosed; private assessment answers remain private.",
       { exact: true },
     ),
   ).toBeVisible();
@@ -130,7 +136,7 @@ test("mobile dark theme, reduced motion and keyboard disclosure", async ({
   await page.keyboard.press("Enter");
   await expect(
     page.getByText(
-      "Private assessments are not used for cross-tenant discovery.",
+      "Only derived compatibility is disclosed; private assessment answers remain private.",
       { exact: true },
     ),
   ).toBeVisible();
@@ -145,7 +151,7 @@ test("mobile dark theme, reduced motion and keyboard disclosure", async ({
   });
 });
 
-test("loading, safe error, retry and not-configured state", async ({
+test("loading, safe error, retry and assessment-required state", async ({
   page,
 }) => {
   await mockWorkspace(page, [demoBusiness]);
@@ -160,7 +166,12 @@ test("loading, safe error, retry and not-configured state", async ({
       return route.fulfill({ status: 503, body: "private internal detail" });
     }
     return route.fulfill({
-      json: { ...fixture, matches: [], directory_status: "not_configured" },
+      json: {
+        ...fixture,
+        matches: [],
+        directory_status: "automatic",
+        discovery_eligible: false,
+      },
     });
   });
   await page.goto("/workspace/org-a/discover");
@@ -174,7 +185,7 @@ test("loading, safe error, retry and not-configured state", async ({
   await page.getByRole("button", { name: "Retry", exact: true }).click();
   await expect(
     page.getByRole("heading", {
-      name: "Discovery is awaiting publication approval",
+      name: "Complete your assessment to discover partners",
     }),
   ).toBeVisible();
 });
@@ -215,4 +226,107 @@ test("approved empty directory and insufficient evidence never fabricate scores"
   await expect(
     page.getByText("Compatibility / 100", { exact: true }),
   ).toHaveCount(0);
+});
+
+test("automatic native processing refreshes discovery with no invitation or console calls", async ({
+  page,
+}) => {
+  await mockWorkspace(page, [demoBusiness]);
+  let processed = false,
+    syncs = 0,
+    writes = 0;
+  await page.route("**/api/businesses/org-a/assessments**", (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path.endsWith("/sync")) {
+      syncs++;
+      expect(route.request().postDataJSON()).toEqual({});
+      processed = true;
+      return route.fulfill({
+        json: {
+          id: "native",
+          status: "completed_verified",
+          processing_status: "ready",
+          processing_message:
+            "Assessment processed. Discovery has been updated.",
+        },
+      });
+    }
+    if (route.request().method() !== "GET") writes++;
+    return route.fulfill({
+      json: {
+        assessments: [
+          {
+            id: "native",
+            integration_mode: "salesforce_flow",
+            dispatch_state: "sent",
+            status: "launch_requested",
+            initiated_at: "2026-11-12T00:00:00Z",
+          },
+        ],
+      },
+    });
+  });
+  await page.route("**/api/businesses/org-a/matches", (route) =>
+    route.fulfill({
+      json: processed
+        ? fixture
+        : { ...fixture, discovery_eligible: false, matches: [] },
+    }),
+  );
+  await page.goto("/workspace/org-a/discover");
+  await expect(
+    page.getByRole("article", { name: fixture.matches[0].partner.name }),
+  ).toBeVisible();
+  await expect(
+    page.getByLabel("Automatic assessment processing"),
+  ).toContainText("Assessment processed");
+  expect(syncs).toBe(1);
+  expect(writes).toBe(0);
+});
+
+test("processing failure offers a safe retry and never starts another invitation", async ({
+  page,
+}) => {
+  await mockWorkspace(page, [demoBusiness]);
+  let attempts = 0;
+  await page.route("**/api/businesses/org-a/assessments**", (route) => {
+    if (route.request().url().endsWith("/sync")) {
+      attempts++;
+      return route.fulfill({
+        json: {
+          status: "completed_verified",
+          processing_status: attempts === 1 ? "retry" : "ready",
+          processing_message:
+            attempts === 1
+              ? "Completion verified. Answers are temporarily unavailable; processing will retry."
+              : "Assessment processed.",
+        },
+      });
+    }
+    expect(route.request().method()).toBe("GET");
+    return route.fulfill({
+      json: {
+        assessments: [
+          {
+            id: "native",
+            integration_mode: "salesforce_flow",
+            status: "completed_verified",
+            initiated_at: "2026-11-12T00:00:00Z",
+          },
+        ],
+      },
+    });
+  });
+  await page.route("**/api/businesses/org-a/matches", (route) =>
+    route.fulfill({ json: fixture }),
+  );
+  await page.goto("/workspace/org-a/discover");
+  await expect(
+    page.getByLabel("Automatic assessment processing"),
+  ).toContainText("temporarily unavailable");
+  await page.getByRole("button", { name: "Retry processing" }).click();
+  await expect(
+    page.getByLabel("Automatic assessment processing"),
+  ).toContainText("Assessment processed.");
+  expect(attempts).toBe(2);
 });

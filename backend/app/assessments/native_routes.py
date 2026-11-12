@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, Request, Response
 from ..business.routes import Database, Identity, require_write_origin
 from ..workspace.identifiers import RecordID
 from .dispatch import dispatch
+from .processing import process
 from .schemas import AssessmentSummary, DispatchAssessment, InitiateAssessment
-from .synchronize import synchronize
 
 router = APIRouter(prefix="/api/businesses/{business_id}/assessments", tags=["Native assessments"])
 
@@ -55,4 +55,4 @@ def sync(
     response: Response,
 ):
     response.headers["Cache-Control"] = "no-store"
-    return synchronize(db, principal, business_id, assessment_id, salesforce(request))
+    return process(db, principal, business_id, assessment_id, salesforce(request))

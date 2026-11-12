@@ -35,9 +35,10 @@ export function NativeAssessment({
       );
       if (active.current) {
         setMessage(
-          result.status === "completed_verified"
-            ? "Salesforce completion verified."
-            : "Completion not verified. Reconciliation never sends another invitation.",
+          result.processing_message ||
+            (result.status === "completed_verified"
+              ? "Salesforce completion verified."
+              : "Completion not verified. Reconciliation never sends another invitation."),
         );
         refresh();
       }
@@ -91,6 +92,11 @@ export function NativeAssessment({
                     : "Dispatch is pending or uncertain. Use reconciliation; do not create a second invitation.",
                 );
                 refresh();
+                window.dispatchEvent(
+                  new CustomEvent("kobentra-assessment-changed", {
+                    detail: businessId,
+                  }),
+                );
               }
             } catch (err) {
               if (active.current)

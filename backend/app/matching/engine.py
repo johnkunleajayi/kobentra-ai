@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+from .signals import industry, interests, operations, timing
+
 RULES = json.loads(Path(__file__).with_name("rules.json").read_text(encoding="utf-8"))
 
 
@@ -11,10 +13,10 @@ def normalized(value):
 
 
 def compare(source, partner, rules=None):
-    """Inputs are profile fields and explicitly discovery-approved market preferences.
+    """Compare internal normalized features; disclose only derived explanations.
 
-    No assessment text, scores, raw evidence, opportunities or contact details enter
-    this engine. Conflicting dimensions must be unknown, never a favorable match.
+    Raw answers, readiness and contact details must never enter the response.
+    Conflicting dimensions are unknown, never a favorable match.
     """
     rules = rules or RULES
     dimensions = []
@@ -32,15 +34,10 @@ def compare(source, partner, rules=None):
             }
         )
 
-    def intents(item, target_country):
-        return {
-            rules["intent_aliases"][normalized(p["partner_type"])]
-            for p in item["preferences"]
-            if normalized(p["partner_type"]) in rules["intent_aliases"]
-            and normalized(p["country"]) == normalized(target_country)
-        }
-
-    a, b = intents(source, partner["country"]), intents(partner, source["country"])
+    a, b = (
+        interests(source, partner["country"], rules),
+        interests(partner, source["country"], rules),
+    )
     complements = {frozenset(p) for p in rules["complementary_intents"]}
     complementary = any(frozenset((x, y)) in complements for x in a for y in b)
     # An unrecognized term may describe a valid relationship; never interpret it as rejection.
@@ -51,15 +48,7 @@ def compare(source, partner, rules=None):
         if complementary
         else "No documented complementary intent pair is established.",
     )
-    same_sector = normalized(source["sector"]) == normalized(partner["sector"])
-    add(
-        "industry_capability",
-        "compatible" if same_sector and normalized(source["sector"]) else "unknown",
-        "Same declared industry; capabilities remain unknown."
-        if same_sector
-        else "Different or missing industries do not establish capability fit or incompatibility.",
-        rules["industry_known_fraction"],
-    )
+    add("industry_capability", *industry(source, partner, complementary, rules))
     source_targets = {normalized(p["country"]) for p in source["preferences"]}
     partner_targets = {normalized(p["country"]) for p in partner["preferences"]}
     # Require reciprocal expressed market interest; country is a base, not proof of coverage.
@@ -77,12 +66,8 @@ def compare(source, partner, rules=None):
         )
     else:
         add("geography", "unknown", "Reciprocal target-country preferences are incomplete.")
-    add(
-        "operations",
-        "unknown",
-        "No structured operational requirements or discovery-approved capacity evidence.",
-    )
-    add("timing", "unknown", "No structured shared partnership timing requirements.")
+    add("operations", *operations(source, partner, rules))
+    add("timing", *timing(source, partner, rules))
     conflicts = set(source.get("conflicts", ())) | set(partner.get("conflicts", ()))
     for d in dimensions:
         if d["dimension"] in conflicts:
@@ -104,14 +89,15 @@ def compare(source, partner, rules=None):
     )
     return {
         "rules_version": rules["version"],
+        "rules_revision": rules["revision"],
         "score": score,
         "coverage_percent": coverage,
         "sufficient_evidence": sufficient,
         "dimensions": dimensions,
         "provisional": True,
         "limitations": [
-            "All disclosed business information is self-reported.",
-            "Readiness and identity verification are separate from compatibility.",
-            "Private assessments are not used for cross-tenant discovery.",
+            "Matches are based on business-provided information. Verify partner details before entering commercial agreements.",
+            "Only derived compatibility is disclosed; private assessment answers remain private.",
+            "Previous cross-border experience is not required. Agree trade logistics before proceeding.",
         ],
     }

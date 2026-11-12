@@ -1,5 +1,9 @@
 # Partner Discovery — milestone 2J
 
+> Historical milestone reference. Current discovery no longer uses publication
+> allowlists or approval: see [Hackathon MVP](HACKATHON-MVP.md). The old demo fixture
+> alone cannot qualify without native assessment evidence.
+
 Workspace route: `/workspace/:businessId/discover`. Uses the existing authenticated
 `GET /api/businesses/{business_id}/matches`, current business switcher and design
 tokens. Displays computed score, coverage, compatible/incompatible/unknown dimensions,

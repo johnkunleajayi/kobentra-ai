@@ -194,7 +194,7 @@ test("pending deletion blocks other decisions and safely resumes the original op
   const writes = await mock(page, true);
   await page.goto(`/admin/businesses/${id}`);
   await expect(
-    page.getByRole("button", { name: "Approve", exact: true }),
+    page.getByRole("button", { name: "Suspend", exact: true }),
   ).toBeDisabled();
   await expect(
     page.getByText(
@@ -258,7 +258,7 @@ test("lost confirmation response retrieves durable status instead of claiming co
     page.getByRole("button", { name: "Resume deletion", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Approve", exact: true }),
+    page.getByRole("button", { name: "Suspend", exact: true }),
   ).toBeDisabled();
   await expect(
     page.getByRole("heading", { name: "Business deletion completed" }),

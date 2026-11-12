@@ -19,9 +19,9 @@ def test_discovery_gaps_and_mandatory_introduction_gate(evidence, setup, busines
     client.post(url + "/ingest", json={}, headers=ORIGIN)
     response = client.get(f"/api/businesses/{businesses[0]}/qualification")
     body = response.json()
-    assert body["policy"]["discovery_eligible"] is True
+    assert body["policy"]["discovery_eligible"] is False
     assert body["policy"]["introduction_allowed"] is False
-    assert "business_identity" in body["disclosed_gaps"]
+    assert "business_identity" not in body["disclosed_gaps"]
     assert body["independently_verified_evidence"] == [] and body["score"] is None
     assert body["profile"]["classification"] == "self_reported"
     with Session(setup[1]) as db:

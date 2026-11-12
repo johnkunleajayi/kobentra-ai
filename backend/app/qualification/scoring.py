@@ -48,12 +48,6 @@ def evaluate(snapshots, profile, preferences, rules=None):
                 "recommendation": "Set target countries and partnership interests.",
             }
         )
-    gaps.append(
-        {
-            "code": "business_identity",
-            "recommendation": "Obtain independent business-identity verification before introductions.",
-        }
-    )
     dimensions = []
     for name, spec in rules["dimensions"].items():
         reasons, points = [], []
@@ -77,12 +71,6 @@ def evaluate(snapshots, profile, preferences, rules=None):
                 elif key == "cross_border_experience":
                     if values[key] is False:
                         point = rules["no_cross_border_score"]
-                        gaps.append(
-                            {
-                                "code": "cross_border_experience_development",
-                                "recommendation": "Prepare a supported first cross-border engagement.",
-                            }
-                        )
                     reason = (
                         "Declared experience informs preparation; absence is not business failure."
                     )

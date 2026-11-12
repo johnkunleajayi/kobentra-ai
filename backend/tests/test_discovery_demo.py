@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 import pytest
@@ -51,12 +50,8 @@ def test_repeatable_fictional_demo_uses_real_engine_and_isolation(setup, monkeyp
             p.name.startswith("Fictional Demo — ") for p in db.scalars(select(BusinessProfile))
         )
         body = matches(db, Principal("alice"), ids[0], ids)
-        assert len(body["matches"]) == 1
-        fit = body["matches"][0]["compatibility"]
-        assert fit["score"] == 100 and fit["coverage_percent"] == 62.5
-        assert fit["dimensions"][3]["state"] == "unknown"
-        assert fit["dimensions"][4]["state"] == "unknown"
-        assert body["matches"][0]["introduction_eligibility"]["allowed"] is False
+        # The legacy fixture contains no genuine SurveyVista evidence: never invent it.
+        assert body["matches"] == [] and body["discovery_eligible"] is False
         assert matches(db, Principal("alice"), ids[0], [])["matches"] == []
     login(setup, "bob")
     assert client.get(f"/api/businesses/{ids[0]}/matches").status_code == 403
@@ -65,10 +60,6 @@ def test_repeatable_fictional_demo_uses_real_engine_and_isolation(setup, monkeyp
     response = client.get(f"/api/businesses/{ids[0]}/matches")
     assert response.status_code == 200
     assert "normalized_value" not in response.text and "provider_response_id" not in response.text
-    # Fictional-only API artifact for frontend browser tests: scores come from the real engine.
-    target = Path(__file__).resolve().parents[2] / "work" / "discovery-fixture.json"
-    target.parent.mkdir(exist_ok=True)
-    target.write_text(json.dumps(response.json()), encoding="utf-8")
 
 
 def test_unknown_local_owner_cannot_create_or_publish(setup, monkeypatch):

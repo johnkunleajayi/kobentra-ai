@@ -6,6 +6,7 @@ import { PartnerCard } from "./PartnerCard";
 import { QualificationGaps } from "./QualificationGaps";
 import type { DiscoveryResponse } from "./types";
 import "./discovery.css";
+import { useEffect } from "react";
 
 export function DiscoveryPage({
   businessId,
@@ -15,6 +16,20 @@ export function DiscoveryPage({
   country: string;
 }) {
   const resource = useResource<DiscoveryResponse>(discoveryPath(businessId));
+  const refreshDiscovery = resource.retry;
+  useEffect(() => {
+    const update = (event: Event) => {
+      if ((event as CustomEvent).detail === businessId) refreshDiscovery();
+    };
+    const timer = setInterval(() => {
+      if (!document.hidden) refreshDiscovery();
+    }, 15000);
+    window.addEventListener("kobentra-assessment-processed", update);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("kobentra-assessment-processed", update);
+    };
+  }, [businessId, refreshDiscovery]);
   return (
     <section className="partner-discovery" aria-labelledby="discovery-title">
       <header className="discovery-intro">
@@ -30,7 +45,7 @@ export function DiscoveryPage({
           establish.
         </p>
         <span className="discovery-provisional">
-          Provisional discovery · Identity verification required
+          Provisional business connections
         </span>
       </header>
       {!resource.data ? (
@@ -53,14 +68,13 @@ export function DiscoveryPage({
             <div className="discovery-state">
               <Compass size={36} aria-hidden="true" />
               <h3>
-                {resource.data.directory_status === "not_configured"
-                  ? "Discovery is awaiting publication approval"
+                {resource.data.discovery_eligible === false
+                  ? "Complete your assessment to discover partners"
                   : "No cross-border partners to show yet"}
               </h3>
               <p>
-                {resource.data.directory_status === "not_configured"
-                  ? "The approved discovery directory has not been configured. Registering a business does not automatically publish it."
-                  : "No approved businesses in another country are currently available. Your private business data remains within your workspace."}
+                {resource.data.status_message ||
+                  "Eligible businesses appear automatically after assessment processing. No administrator publication is needed."}
               </p>
             </div>
           ) : (
@@ -80,8 +94,10 @@ export function DiscoveryPage({
             />
           )}
           <p className="discovery-rules">
-            Rules: {resource.data.rules_version}. Scores describe compatibility
-            under partial evidence, never a verified partnership.
+            Matches are based on business-provided information. Verify partner
+            details before entering commercial agreements. Rules:{" "}
+            {resource.data.rules_version}. Scores describe compatibility under
+            partial evidence, never a verified partnership.
           </p>
         </>
       )}

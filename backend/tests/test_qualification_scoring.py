@@ -152,7 +152,8 @@ def test_api_scoring_is_scoped_readonly_and_cannot_unlock_introductions(
     body = response.json()
     assert body["readiness"]["version"] == RULES["version"]
     assert body["policy"]["introduction_allowed"] is False
-    assert body["policy"]["discovery_eligible"] is True
+    # This ingestion fixture lacks complete validated answers and market preferences.
+    assert body["policy"]["discovery_eligible"] is False
     assert body["confidence"]["classification"] in {"self_reported", "conflicting"}
     assert client.get(url + "/evidence").json() == before
     other = client.get(f"/api/businesses/{businesses[1]}/qualification").json()

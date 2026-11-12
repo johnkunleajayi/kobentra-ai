@@ -1,4 +1,4 @@
-import { ArrowUpRight, LockKeyhole, MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin } from "lucide-react";
 import type { PartnerMatch } from "./types";
 
 const labels: Record<string, string> = {
@@ -53,8 +53,8 @@ export function PartnerCard({
           value={fit.coverage_percent}
         />
         <small>
-          Partial evidence. Neither business readiness nor independent
-          verification.
+          Coverage reflects how much of this match can be explained from
+          declared information.
         </small>
       </div>
       <details className="partner-explanation" open>
@@ -81,20 +81,10 @@ export function PartnerCard({
           )}
         </ul>
       </details>
-      <div className="partner-guard">
-        <LockKeyhole size={19} aria-hidden="true" />
-        <div>
-          <strong>
-            {match.introduction_eligibility.allowed
-              ? "Introductions are not available here"
-              : "Introduction restricted"}
-          </strong>
-          <p>{match.introduction_eligibility.reason}</p>
-          <small>
-            No invitation or contact details are released from discovery.
-          </small>
-        </div>
-      </div>
+      <p className="partner-guard">
+        Potential partner, not a verified commercial relationship. Introductions
+        remain a separate consent-based step.
+      </p>
     </article>
   );
 }

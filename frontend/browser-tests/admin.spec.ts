@@ -215,7 +215,7 @@ test("owner dashboard, directory pagination and business details are read-only",
     page.getByText("No assessments recorded.", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Approve", exact: true }),
+    page.getByRole("button", { name: "Suspend", exact: true }),
   ).toBeEnabled();
   await expect(
     page.getByRole("button", { name: "Delete business", exact: true }),
@@ -288,7 +288,7 @@ test("administrative dialogs require reasons, record decisions and edit supporte
   await session(page, true);
   const mock = await api(page);
   await page.goto(`/admin/businesses/${business.id}`);
-  await page.getByRole("button", { name: "Approve", exact: true }).click();
+  await page.getByRole("button", { name: "Suspend", exact: true }).click();
   await page
     .getByRole("button", { name: "Confirm decision", exact: true })
     .click();
@@ -297,12 +297,10 @@ test("administrative dialogs require reasons, record decisions and edit supporte
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   for (const label of [
-    "Approve",
     "Verify identity",
     "Suspend",
     "Reactivate",
     "Revoke verification",
-    "Reject",
   ]) {
     await page.getByRole("button", { name: label, exact: true }).click();
     const dialog = page.getByRole("dialog");
@@ -336,7 +334,7 @@ test("administrative dialogs require reasons, record decisions and edit supporte
   await expect(
     page.getByRole("heading", { name: "Fictional Updated Business" }),
   ).toBeVisible();
-  expect(mock.writes.length).toBe(7);
+  expect(mock.writes.length).toBe(5);
   await expect(page.getByLabel("Administrative statuses")).toContainText(
     "Approval: pending",
   );
@@ -376,7 +374,7 @@ test("failed decision preserves a safe identical retry", async ({ page }) => {
       : route.fallback();
   });
   await page.goto(`/admin/businesses/${business.id}`);
-  await page.getByRole("button", { name: "Approve", exact: true }).click();
+  await page.getByRole("button", { name: "Suspend", exact: true }).click();
   await page
     .getByLabel("Required decision reason")
     .fill("Retry fictional decision");

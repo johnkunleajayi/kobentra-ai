@@ -25,8 +25,7 @@ class Settings(BaseSettings):
         if value is not None and (not value.get_secret_value().strip() or len(value.get_secret_value()) > 255):
             raise ValueError("Invalid platform-owner configuration")
         return value
-    # Explicit publication approval covers name/sector/country and derived market-interest compatibility.
-    # Empty by default: registration alone does not consent to cross-tenant discovery.
+    # Deprecated compatibility setting; automatic assessment-driven discovery ignores it.
     matching_discovery_business_ids: list[str] = []
 
     @field_validator("matching_discovery_business_ids")
