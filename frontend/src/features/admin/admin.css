@@ -5,6 +5,28 @@
   margin: auto;
   min-height: 680px;
 }
+.button.admin-destructive {
+  background: #b42318;
+  color: #fff;
+}
+.admin-delete-panel {
+  border-color: #b42318;
+}
+.admin-delete-panel button {
+  margin: 8px 10px 8px 0;
+}
+.admin-dialog dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  padding: 6px 0;
+}
+.admin-dialog ul {
+  font-size: 12px;
+  line-height: 1.7;
+  padding-left: 18px;
+}
 .admin-statuses {
   display: flex;
   flex-wrap: wrap;

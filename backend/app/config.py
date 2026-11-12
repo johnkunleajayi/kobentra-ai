@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     )
     app_env: Literal["development", "test"] = "development"
     platform_owner_google_subject: SecretStr | None = None
+    salesforce_business_deletion_enabled: bool = False
 
     @field_validator("platform_owner_google_subject")
     @classmethod

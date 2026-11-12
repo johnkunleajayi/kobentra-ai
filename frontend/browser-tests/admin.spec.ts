@@ -217,7 +217,9 @@ test("owner dashboard, directory pagination and business details are read-only",
   await expect(
     page.getByRole("button", { name: "Approve", exact: true }),
   ).toBeEnabled();
-  await expect(page.getByRole("button", { name: /delete/i })).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Delete business", exact: true }),
+  ).toBeVisible();
   await page
     .getByRole("link", { name: "Business directory", exact: false })
     .click();

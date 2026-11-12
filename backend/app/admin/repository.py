@@ -5,6 +5,7 @@ from sqlalchemy import func, or_, select
 from ..assessments.models import BusinessAssessment
 from ..models import BusinessProfile, Membership, Organization, User
 from ..qualification.models import AssessmentEvidence
+from .deletion.models import DeletionOperation
 from .eligibility import statuses
 from .models import BusinessAdministration
 
@@ -17,7 +18,7 @@ def summary(db):
     return {
         "users": count(db, User),
         "businesses": count(db, BusinessProfile),
-        "workspaces": count(db, Organization),
+        "workspaces": db.scalar(select(func.count()).select_from(Organization).where(Organization.id.not_in(select(DeletionOperation.organization_id).where(DeletionOperation.state == "completed")))),
         "assessment_statuses": dict(
             db.execute(
                 select(BusinessAssessment.status, func.count()).group_by(BusinessAssessment.status)

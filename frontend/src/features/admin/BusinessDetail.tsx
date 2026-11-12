@@ -1,18 +1,41 @@
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ResourceState } from "../workspace/ResourceState";
 import { useResource } from "../workspace/useResource";
 import { dateLabel, type BusinessDetail } from "./types";
 import { BusinessManagement } from "./BusinessManagement";
+import { BusinessDeletion } from "./BusinessDeletion";
 
 export function AdminBusinessDetail() {
   const { businessId = "" } = useParams();
   const [savedBusiness, setSavedBusiness] = useState("");
+  const [deletingBusiness, setDeletingBusiness] = useState("");
+  const [deletedBusiness, setDeletedBusiness] = useState("");
+  const deletionPending = useCallback(
+    () => setDeletingBusiness(businessId),
+    [businessId],
+  );
+  const deletionCompleted = useCallback(
+    () => setDeletedBusiness(businessId),
+    [businessId],
+  );
   const resource = useResource<BusinessDetail>(
     `/api/admin/businesses/${encodeURIComponent(businessId)}`,
   );
   if (!resource.data)
     return <ResourceState error={resource.error} retry={resource.retry} />;
+  if (deletedBusiness === businessId)
+    return (
+      <section className="admin-panel">
+        <h1>Business deletion completed</h1>
+        <p>
+          Business-owned local data was removed after linked Lead Recycle Bin
+          deletion was verified or no Lead was linked. Required platform audit
+          history remains.
+        </p>
+        <Link to="/admin/businesses">Return to business directory</Link>
+      </section>
+    );
   const business = resource.data,
     qualification = business.qualification;
   return (
@@ -29,12 +52,19 @@ export function AdminBusinessDetail() {
         <p role="status">Administrative decision saved.</p>
       )}
       <BusinessManagement
-        key={businessId}
+        disabled={deletingBusiness === businessId}
+        key={`management-${businessId}`}
         business={business}
         refresh={() => {
           setSavedBusiness(businessId);
           resource.retry();
         }}
+      />
+      <BusinessDeletion
+        key={`deletion-${businessId}`}
+        businessId={businessId}
+        pending={deletionPending}
+        completed={deletionCompleted}
       />
       <section className="admin-panel">
         <h2>Ownership & registration</h2>

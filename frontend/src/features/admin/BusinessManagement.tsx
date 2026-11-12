@@ -8,9 +8,11 @@ import { StatusBadges } from "./StatusBadges";
 export function BusinessManagement({
   business,
   refresh,
+  disabled: controlsDisabled = false,
 }: {
   business: BusinessDetail;
   refresh: () => void;
+  disabled?: boolean;
 }) {
   const [action, setAction] = useState<AdminAction | null>(null);
   const state = business.administration;
@@ -40,7 +42,7 @@ export function BusinessManagement({
               type="button"
               className="secondary"
               key={key}
-              disabled={disabled}
+              disabled={disabled || controlsDisabled}
               onClick={() => {
                 setAction(key);
               }}
@@ -50,7 +52,7 @@ export function BusinessManagement({
           ))}
         </div>
       </section>
-      {action && (
+      {action && !controlsDisabled && (
         <DecisionDialog
           action={action}
           businessId={business.id}

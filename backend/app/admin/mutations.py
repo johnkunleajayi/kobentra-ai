@@ -34,6 +34,9 @@ def mutate(db, principal, settings, business_id, data):
             )
             if not is_platform_owner(db.get(User, principal.user_id), settings):
                 raise HTTPException(403, "Access denied")
+            from .deletion.models import DeletionOperation
+            if db.scalar(select(DeletionOperation.id).where(DeletionOperation.organization_id == business_id)):
+                raise HTTPException(409, "Business deletion is pending or complete")
             profile = db.scalar(
                 select(BusinessProfile).where(BusinessProfile.organization_id == business_id)
             )

@@ -22,6 +22,9 @@ def values(row):
 
 
 def require_operational(db, business_id):
+    from .deletion.models import DeletionOperation
+    if db.scalar(select(DeletionOperation.id).where(DeletionOperation.organization_id == business_id)):
+        raise HTTPException(403, "Business deletion is pending or complete")
     if status(db, business_id)["access"] == "suspended":
         raise HTTPException(403, "Business access suspended")
 
