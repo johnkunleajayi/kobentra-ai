@@ -1,5 +1,9 @@
 # Kobentra AI — Phase 1
 
+Current public-deployment preparation: [Vercel deployment guide](docs/VERCEL-DEPLOYMENT.md).
+The Phase 1 setup and disconnected-feature descriptions below are historical; see
+[Hackathon MVP](docs/HACKATHON-MVP.md) for the current authenticated workflow.
+
 Local review checkpoint for an enterprise-oriented West African business matchmaking platform. Prepared for the user-stated West Africa Dreamin’ 2026 hackathon target, 21 November 2026. This repository contains a preview and tested foundation, not a production service.
 
 ## Run locally (PowerShell)

@@ -23,6 +23,7 @@ from .market_preferences.routes import router as preferences_router
 from .matching.routes import router as matching_router
 from .opportunities.routes import router as opportunities_router
 from .qualification.routes import router as qualification_router
+from .salesforce.budget import request_budget
 from .salesforce.client import SalesforceClient
 from .security import Principal, require_principal
 from .workspace.routes import router as workspace_router
@@ -69,9 +70,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @api.middleware("http")
     async def request_id(request: Request, call_next):
         request.state.request_id = str(uuid4())
-        response = await call_next(request)
-        if request.url.path.startswith("/api/admin/") or request.url.path == "/api/auth/me":
+        # Sync FastAPI handlers inherit this context. Retries share one budget.
+        with request_budget(settings.app_env == "production"):
+            response = await call_next(request)
+        if request.url.path.startswith("/api/"):
             response.headers["Cache-Control"] = "no-store"
+            response.headers["CDN-Cache-Control"] = "no-store"
         response.headers["X-Request-ID"] = request.state.request_id
         return response
 

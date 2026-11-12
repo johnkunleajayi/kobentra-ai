@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 
 import httpx
 
+from .budget import timeout
+
 
 class SalesforceError(Exception):
     """Intentionally excludes response bodies, URLs, credentials and user data."""
@@ -42,6 +44,7 @@ class SalesforceClient:
                         "client_id": self.settings.salesforce_client_id.get_secret_value(),
                         "client_secret": self.settings.salesforce_client_secret.get_secret_value(),
                     },
+                    timeout=timeout(),
                 )
                 response.raise_for_status()
                 data = response.json()
@@ -53,7 +56,7 @@ class SalesforceClient:
                 # Core Salesforce may omit expires_in; use a conservative local cache TTL.
                 lifetime = min(float(data.get("expires_in", 300)), 300)
                 self.token, self.expires = token, time.monotonic() + max(0, lifetime - 15)
-            except (httpx.HTTPError, ValueError, KeyError, TypeError):
+            except (httpx.HTTPError, ValueError, KeyError, TypeError, TimeoutError):
                 self.token = None
                 raise SalesforceError("Salesforce authentication unavailable") from None
 
@@ -72,6 +75,7 @@ class SalesforceClient:
                     method,
                     self.origin + path,
                     headers={"Authorization": f"Bearer {self.token}"},
+                    timeout=timeout(),
                     **kwargs,
                 )
                 if response.status_code == 401 and attempt == 0:
@@ -79,7 +83,7 @@ class SalesforceClient:
                     continue
                 response.raise_for_status()
                 return response.json() if response.content else {}
-        except (httpx.HTTPError, ValueError, TypeError):
+        except (httpx.HTTPError, ValueError, TypeError, TimeoutError):
             raise SalesforceError(
                 "Salesforce request failed; reconciliation may be required"
             ) from None

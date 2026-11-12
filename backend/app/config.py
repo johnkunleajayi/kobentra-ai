@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import SecretStr, field_validator
+from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ArgumentError
@@ -15,7 +15,8 @@ class Settings(BaseSettings):
         extra="forbid",
         hide_input_in_errors=True,
     )
-    app_env: Literal["development", "test"] = "development"
+    app_env: Literal["development", "test", "production"] = "development"
+    vercel: bool = False
     platform_owner_google_subject: SecretStr | None = None
     salesforce_business_deletion_enabled: bool = False
 
@@ -158,3 +159,10 @@ class Settings(BaseSettings):
                 "CORS requires explicit HTTP origins without paths, wildcards or credentials"
             )
         return values
+
+    @model_validator(mode="after")
+    def deployment_configuration(self):
+        from .deployment import validate_deployment
+
+        validate_deployment(self)
+        return self
