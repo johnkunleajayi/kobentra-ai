@@ -414,7 +414,7 @@ export function Workspace() {
           {slug === "events" && (
             <>
               <div className="notice">
-                EventSpark: planned, not connected. No live events or
+                Fictional event demonstration. No live events or
                 registrations are available.
               </div>
               <article className="event-card">
@@ -467,11 +467,11 @@ export function Workspace() {
               <div className="workspace-note">
                 <h3>Integration status</h3>
                 <p>
-                  Email / Google authentication: not configured.
+                  This fictional workspace does not use live integrations.
                   <br />
-                  Salesforce: not connected.
+                  Sign in with Google to manage your real business.
                   <br />
-                  EventSpark: planned, not connected.
+                  The real platform connects to Salesforce and SurveyVista.
                 </p>
               </div>
             </>

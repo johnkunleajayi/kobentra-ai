@@ -6,12 +6,13 @@ import {
   MoveUpRight,
   Network,
   Globe2,
-  ChevronDown,
 } from "lucide-react";
 import { Picture, Cta, Eyebrow } from "../../components/Primitives";
+import { LandingMotion } from "./LandingMotion";
+import { EcosystemMarquee } from "./EcosystemMarquee";
 export function Home() {
   return (
-    <>
+    <LandingMotion>
       <section className="hero section">
         <div className="hero-copy">
           <Eyebrow>AFRICAN AMBITION. CONNECTED.</Eyebrow>
@@ -45,8 +46,6 @@ export function Home() {
             file="home/home-hero-business-connections.png"
             alt="African business professionals sharing a conversation at a networking event"
           />
-          <div className="image-topline">
-          </div>
           <div className="hero-stamp">
             <Network size={28} />
             <span>
@@ -59,15 +58,9 @@ export function Home() {
 
         </div>
       </section>
-      <div className="market-strip">
-        <span>ONE CONNECTED BUSINESS ECOSYSTEM</span>
-        <p>
-          Buyers <i>✳</i> Suppliers <i>✳</i> Distributors <i>✳</i> Investors{" "}
-          <i>✳</i> Partners
-        </p>
-      </div>
+      <EcosystemMarquee />
       <section className="section possibility">
-        <div className="section-heading">
+        <div className="section-heading" data-reveal>
           <div>
             <Eyebrow>THE RIGHT PEOPLE CHANGE EVERYTHING</Eyebrow>
             <h2>
@@ -83,7 +76,7 @@ export function Home() {
           </p>
         </div>
         <div className="editorial-grid">
-          <article className="feature-large">
+          <article className="feature-large" data-reveal>
             <Picture
               file="home/home-african-entrepreneur.png"
               alt="Food entrepreneur standing in her production facility"
@@ -105,7 +98,7 @@ export function Home() {
             </div>
           </article>
           <div className="feature-stack">
-            <article className="orange-card">
+            <article className="orange-card" data-reveal>
               <Globe2 size={35} />
               <h3>
                 Your market doesn’t
@@ -120,7 +113,7 @@ export function Home() {
                 Discover the platform <ArrowUpRight size={20} />
               </Link>
             </article>
-            <article className="mini-image-card">
+            <article className="mini-image-card" data-reveal>
               <Picture
                 file="home/home-business-partnerships.png"
                 alt="Entrepreneurs discussing a potential business partnership"
@@ -142,7 +135,7 @@ export function Home() {
           </div>
         </div>
       </section>
-      <section className="how-preview section">
+      <section className="how-preview section" data-reveal>
         <div>
           <Eyebrow>A CLEAR PATH FORWARD</Eyebrow>
           <h2>
@@ -204,7 +197,7 @@ export function Home() {
               "/platform",
             ],
           ].map(([file, tag, title, to]) => (
-            <Link className="story" to={to} key={file}>
+            <Link className="story" to={to} key={file} data-reveal>
               <Picture file={"home/" + file} alt={title} />
               <div>
                 <span className="eyebrow">{tag}</span>
@@ -219,7 +212,7 @@ export function Home() {
           controls are artwork, not live product results.
         </p>
       </section>
-      <section className="trust section">
+      <section className="trust section" data-reveal>
         <ShieldCheck size={42} />
         <div>
           <Eyebrow>CONNECTION STARTS WITH CONSENT</Eyebrow>
@@ -244,7 +237,7 @@ export function Home() {
           <span>✳</span>
         </div>
       </section>
-      <section className="final-cta section">
+      <section className="final-cta section" data-reveal>
         <Eyebrow>YOUR NEXT CHAPTER</Eyebrow>
         <h2>
           Opportunity is out there.
@@ -252,16 +245,16 @@ export function Home() {
           Let’s make the connection.
         </h2>
         <Cta>Get started with Kobentra</Cta>
-        <p>Explore the preview. No Salesforce account required.</p>
+        <p>Connect your business with new possibilities.</p>
       </section>
-    </>
+    </LandingMotion>
   );
 }
 const steps = [
   [
     "Sign up",
     "Your ambition is the starting point.",
-    "Choose how you want to join. Email and Google entry methods are planned; the local preview never creates a real account.",
+    "Choose how you want to join.",
     "01-signup",
   ],
   [
@@ -384,7 +377,7 @@ export function Audience({ organizer = false }: { organizer?: boolean }) {
           </h2>
           <p>
             {organizer
-              ? "Kobentra’s proposed event experience focuses on relevance and meaningful introductions. Availability depends on future implementation and integration validation."
+              ? "Kobentra’s proposed event experience focuses on relevance and meaningful introductions."
               : "Different businesses. Different goals. A shared ambition to find the right people."}
           </p>
         </div>
@@ -402,10 +395,6 @@ export function Audience({ organizer = false }: { organizer?: boolean }) {
                 [
                   "Clear follow-through",
                   "Give participants a place to organize the opportunities that begin in your event.",
-                ],
-                [
-                  "Honest integration status",
-                  "EventSpark is planned and not connected. Sandbox access, licensing and supported capabilities need verification.",
                 ],
               ]
             : [
@@ -457,7 +446,7 @@ export function Audience({ organizer = false }: { organizer?: boolean }) {
           </h2>
           <p>
             {organizer
-              ? "Event discovery and connection workflows are part of the Kobentra roadmap. No event records or attendee outcomes shown here are live."
+              ? "Event discovery and connection workflows are part of the Kobentra roadmap."
               : "Define what matters to your business, explore sample matches and see how an introduction could begin."}
           </p>
           <Cta to="/demo">Explore the local demo</Cta>
@@ -495,9 +484,7 @@ export function Platform() {
             your business.
           </h2>
           <p>
-            Ordinary Kobentra users won’t need Salesforce accounts. The product
-            is designed around a secure Kobentra backend serving businesses in
-            one centrally managed platform.
+            Kobentra AI is designed around a secure Salesforce backend serving businesses in one centrally managed platform.
           </p>
           <Cta to="/demo">Open the local demo</Cta>
         </div>
@@ -520,7 +507,7 @@ export function Platform() {
           <ArrowRight />
           <div>
             <ShieldCheck />
-            <h3>Secure Kobentra backend</h3>
+            <h3>Secure Salesforce backend</h3>
             <p>
               Membership authorization, scoped queries and consent enforcement.
             </p>
@@ -530,9 +517,9 @@ export function Platform() {
             <Globe2 />
             <h3>Integration adapters</h3>
             <p>
-              Salesforce: not connected.
+              Salesforce connected.
               <br />
-              EventSpark: planned, not connected.
+              SurveyVista: connected.
             </p>
           </div>
         </div>
@@ -541,45 +528,16 @@ export function Platform() {
             <h3>Tenant isolation is our responsibility.</h3>
             <p>
               Organizations are separated through application authorization and
-              tenant-scoped integration contracts. Salesforce does not
-              automatically isolate Kobentra’s customers. Private contact
-              release is reserved for a future server-enforced, mutually
-              accepted workflow.
+              tenant-scoped integration contracts.
             </p>
           </article>
           <article>
             <h3>A deliberate integration boundary.</h3>
             <p>
-              Salesforce secrets and OAuth tokens stay server-side. EventSpark
-              capabilities, licensing and sandbox availability remain unverified
-              for this implementation. Phase 1 makes no external integration
-              calls.
+              Salesforce secrets and OAuth tokens stay server-side.
             </p>
           </article>
         </div>
-        <details>
-          <summary>
-            What can I use in this preview?
-            <ChevronDown size={18} />
-          </summary>
-          <p>
-            Browse public pages, validate local forms and explore fictional data
-            in the clearly labeled demo. Authentication, shared business
-            discovery, real introductions and integrations are not connected.
-          </p>
-        </details>
-        <details>
-          <summary>
-            Who can see my business information?
-            <ChevronDown size={18} />
-          </summary>
-          <p>
-            No real business data should be entered in this Phase 1 preview.
-            Demo data stays in this browser session; a future directory will
-            require explicit publication controls and server-enforced
-            authorization.
-          </p>
-        </details>
       </section>
     </>
   );

@@ -1,0 +1,166 @@
+/* Content is visible by default, including without IntersectionObserver. */
+.landing-motion .hero h1 {
+  animation: hero-copy-in 560ms ease-out both;
+}
+.landing-motion .hero-bottom > p {
+  animation: hero-copy-in 560ms 70ms ease-out both;
+}
+.landing-motion .hero .cta-row {
+  animation: hero-copy-in 560ms 130ms ease-out both;
+}
+.landing-motion .hero-art {
+  animation: hero-art-in 700ms ease-out both;
+}
+.landing-motion [data-reveal].is-revealed {
+  animation: section-in 650ms ease-out;
+}
+.landing-motion [data-reveal]:focus-within {
+  animation: none;
+}
+@keyframes hero-copy-in {
+  from {
+    opacity: 0.65;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hero-art-in {
+  from {
+    opacity: 0.7;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes section-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.landing-motion .market-strip {
+  min-width: 0;
+}
+.ecosystem-marquee {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.ecosystem-track {
+  display: flex;
+  width: max-content;
+  min-width: 200%;
+  animation: ecosystem-drift 36s linear infinite;
+}
+.ecosystem-sequence {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex: 1 0 auto;
+  gap: 32px;
+  padding-inline: 16px;
+}
+.ecosystem-sequence > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 32px;
+  white-space: nowrap;
+  font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+  letter-spacing: -0.03em;
+}
+.ecosystem-sequence i {
+  margin: 0;
+}
+.ecosystem-marquee:focus-within .ecosystem-track,
+.ecosystem-marquee[data-paused="true"] .ecosystem-track {
+  animation-play-state: paused;
+}
+.ecosystem-toggle {
+  flex: 0 0 auto;
+}
+.ecosystem-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@keyframes ecosystem-drift {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.landing-motion .story {
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+.landing-motion :is(.button, .text-link, .circle-link, .story) svg {
+  transition: transform 220ms ease;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ecosystem-marquee:hover .ecosystem-track {
+    animation-play-state: paused;
+  }
+  .landing-motion .story:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px #0b122014;
+  }
+  .landing-motion :is(.button, .text-link, .circle-link):hover svg {
+    transform: translate(2px, -2px);
+  }
+}
+@media (max-width: 900px) {
+  .landing-motion .market-strip {
+    position: relative;
+    padding-right: 64px;
+  }
+  .ecosystem-toggle {
+    position: absolute;
+    right: 20px;
+    bottom: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-motion *,
+  .landing-motion *::before,
+  .landing-motion *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .ecosystem-track {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    transform: none;
+  }
+  .ecosystem-sequence {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 12px 20px;
+    padding: 0;
+  }
+  .ecosystem-sequence > span {
+    gap: 20px;
+  }
+  .ecosystem-sequence + .ecosystem-sequence,
+  .landing-motion .ecosystem-toggle {
+    display: none;
+  }
+}

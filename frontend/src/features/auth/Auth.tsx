@@ -46,9 +46,9 @@ export function Auth({
         </p>
         <LockKeyhole />
         <p className="small-copy">
-          Phase 1 preview · Authentication not connected.
+          {onboarding ? "Fictional local demonstration." : "Secure Google sign-in."}
           <br />
-          Never enter a real password or private business details.
+          {onboarding ? "Use fictional business details only." : "Email and password sign-in is not available. Use Google to continue."}
         </p>
       </div>
       <div className="auth-panel">
@@ -239,7 +239,7 @@ export function Auth({
           </>
         )}
         <p className="small-copy">
-          Salesforce and EventSpark are not connected.
+          Salesforce connected. SurveyVista: connected.
         </p>
       </div>
     </section>
