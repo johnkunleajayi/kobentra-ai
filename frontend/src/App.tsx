@@ -184,6 +184,14 @@ function Layout() {
         </Routes>
       </main>
       <footer>
+        <div className="footer-partner">
+          <a className="surveyvista-branding" href="https://surveyvista.com/" target="_blank" rel="noopener noreferrer">
+            {/* Official, unmodified asset: surveyvista.com/wp-content/themes/survey-vista/assets/images/surveyvista-logo.svg */}
+            <img src={`${A}brand/surveyvista-logo.svg`} alt="SurveyVista" width="180" height="40" />
+            <span>Powered by SurveyVista <small>(A Salesforce ISV Product)</small></span>
+          </a>
+        </div>
+        <div className="footer-content">
         <div className="footer-top">
           <Link to="/">
             <img
@@ -210,6 +218,7 @@ function Layout() {
             <Link to="/demo">Explore local demo ↗</Link>
           </div>
           <span>Made for WAD 2026 Hackathon. Open to possibility.</span>
+        </div>
         </div>
       </footer>
     </AuthContext.Provider>

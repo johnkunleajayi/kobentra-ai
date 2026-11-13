@@ -7,6 +7,45 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
+for (const width of [1440, 768, 390]) {
+  test(`global SurveyVista branding loads in both themes at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 950 });
+    for (const route of ["/", "/platform", "/signin", "/demo", "/admin"]) {
+      await page.goto(route);
+      await expect(page.locator("footer .surveyvista-branding")).toHaveCount(1);
+      await expect(page.locator("footer").getByText("Powered by SurveyVista (A Salesforce ISV Product)", { exact: true })).toBeVisible();
+    }
+    for (const theme of ["light", "dark"]) {
+      if (theme === "dark") await page.getByRole("button", { name: "Use dark theme" }).click();
+      const brand = page.locator("footer .surveyvista-branding");
+      await brand.scrollIntoViewIfNeeded();
+      await expect(brand).toHaveAttribute("href", "https://surveyvista.com/");
+      const logo = brand.getByRole("img", { name: "SurveyVista", exact: true });
+      await expect.poll(() => logo.evaluate(el => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+      const size = await logo.boundingBox();
+      expect(size?.width).toBe(180);
+      expect(size?.height).toBe(40);
+      const layout = await brand.evaluate(el => {
+        const logo = el.querySelector("img")!.getBoundingClientRect();
+        const copy = el.querySelector("span")!.getBoundingClientRect();
+        const tier = el.parentElement!.getBoundingClientRect();
+        const box = el.getBoundingClientRect();
+        return { stacked: copy.top >= logo.bottom, centered: Math.abs((box.left + box.right) / 2 - (tier.left + tier.right) / 2) < 1 };
+      });
+      expect(layout.centered).toBe(true);
+      expect(layout.stacked).toBe(width <= 700);
+      await expect(page.locator("footer").getByRole("link", { name: "Trust & architecture" })).toHaveAttribute("href", "/platform");
+      await expect(page.locator("footer").getByRole("link", { name: "Explore local demo" })).toHaveAttribute("href", "/demo");
+      await brand.focus();
+      await expect(brand).toBeFocused();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      const audit = await new AxeBuilder({ page }).include("footer").analyze();
+      expect(audit.violations).toEqual([]);
+      await page.locator("footer").screenshot({ path: `../work/surveyvista-footer-${width}-${theme}.png` });
+    }
+  });
+}
+
 test("public copy reflects connected integrations without obsolete sections", async ({
   page,
 }) => {
