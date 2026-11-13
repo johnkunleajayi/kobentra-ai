@@ -46,8 +46,6 @@ export function Home() {
             alt="African business professionals sharing a conversation at a networking event"
           />
           <div className="image-topline">
-            <span>GOOD CONNECTIONS. NEW POSSIBILITIES.</span>
-            <span>01 / 06</span>
           </div>
           <div className="hero-stamp">
             <Network size={28} />
@@ -58,7 +56,7 @@ export function Home() {
             </span>
             <MoveUpRight size={26} />
           </div>
-          <span className="image-note">Illustrative business imagery</span>
+
         </div>
       </section>
       <div className="market-strip">

@@ -203,13 +203,13 @@ function Layout() {
         </div>
         <div className="footer-bottom">
           <span>
-            © {new Date().getFullYear()} Kobentra AI · Phase 1 preview
+            © {new Date().getFullYear()} Kobentra AI
           </span>
           <div>
             <Link to="/platform">Trust & architecture</Link>
             <Link to="/demo">Explore local demo ↗</Link>
           </div>
-          <span>Made for West Africa. Open to possibility.</span>
+          <span>Made for WAD 2026 Hackathon. Open to possibility.</span>
         </div>
       </footer>
     </AuthContext.Provider>
